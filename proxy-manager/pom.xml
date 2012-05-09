@@ -41,6 +41,7 @@
     <name>JPaaS :: Apache Manager :: Proxy Manager</name>
     <modules>
         <module>api</module>
+        <module>osgi</module>
     </modules>
 
 
