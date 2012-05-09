@@ -35,39 +35,57 @@ import java.util.List;
 public interface ApacheUtilService {
 
     /**
-         * Load the configuration file
-         * @param filePath path of the configuration file
-         * @return a list with the configuration lines
-         */
-        public List<String> loadConfigurationFile(String filePath);
-
-        /**
-         * Write the configuration in the file
-         * @param filePath path of the file
-         * @param fileStringList the configuration
-         */
-        public void flushConfigurationFile(String filePath, List<String> fileStringList);
-
-        /**
-         * Test if a virtual host exists
-         * @param vhAddress address of the virtual host
-         * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
-         * @return
-         */
-        public boolean isVhostExist(String vhAddress, String vhNameServer);
-
-        /**
-         * Return the path of a Virtual Host configuration file
-         * @param vhAddress address of the virtual host
-         * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
-         * @return path of the Virtual Host configuration file
-         */
-        public String getVhostConfigurationFile(String vhAddress, String vhNameServer);
+     * Load the configuration file
+     * @param filePath path of the configuration file
+     * @return a list with the configuration lines
+     */
+    public List<String> loadConfigurationFile(String filePath);
 
     /**
-         * If it is not done, write a directive in Apache configuration file
-         * to include the Virtual Host configuration folder.
-         */
-        public void includeVhostFolderIfNecessary();
+     * Write the configuration in the file
+     * @param filePath path of the file
+     * @param fileStringList the configuration
+     */
+    public void flushConfigurationFile(String filePath, List<String> fileStringList);
+
+    /**
+     * Test if a virtual host exists
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @return
+     */
+    public boolean isVhostExist(String vhAddress, String vhNameServer);
+
+    /**
+     * Return the path of a Virtual Host configuration file
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @return path of the Virtual Host configuration file
+     */
+    public String getVhostConfigurationFile(String vhAddress, String vhNameServer);
+
+    /**
+     * If it is not done, write a directive in Apache configuration file
+     * to include the Virtual Host configuration folder.
+     */
+    public void includeVhostFolderIfNecessary();
+
+    /**
+     *  Add a directive at the end of a Virtual Host block.
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     */
+    public void addDirectiveInVhost(String vhAddress, String vhNameServer, String directive, String directiveArg) throws ApacheManagerException;
+
+    /**
+     *  Remove a directive of a Virtual Host block.  if the specified directive is present
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param directive the directive to remove
+     */
+    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+            throws ApacheManagerException;
 
 }

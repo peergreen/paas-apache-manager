@@ -31,6 +31,7 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Validate;
 
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -249,6 +250,78 @@ public class ApacheUtil implements ApacheUtilService {
         }
 
         flushConfigurationFile(apacheConfigurationFile, newFileStringList);
+    }
+
+    /**
+     *  Add a directive at the end of a Virtual Host block.
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     */
+    public void addDirectiveInVhost(String vhAddress, String vhNameServer, String directive, String directiveArg) throws ApacheManagerException {
+        logger.debug("addDirectiveInVhost (" + vhAddress + "," + vhNameServer + "," + directive + "," + directiveArg
+                + ")");
+
+        if (isVhostExist(vhAddress, vhNameServer)) {
+            String vhostFile = getVhostConfigurationFile(vhAddress, vhNameServer);
+            List<String> fileStringList = loadConfigurationFile(vhostFile);
+            List<String> newFileStringList = new LinkedList<String>();
+            String line = directive + " " + directiveArg;
+            String vhostEnd = "</VirtualHost>";
+
+            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+                String string = iterator.next();
+                if (string.contains(vhostEnd)) {
+                    newFileStringList.add(line);
+                }
+                newFileStringList.add(string);
+
+            }
+
+            flushConfigurationFile(vhostFile, newFileStringList);
+        } else {
+            throw new ApacheManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
+                    + ") does not exist");
+        }
+    }
+
+    /**
+     *  Remove a directive of a Virtual Host block.  if the specified directive is present
+     * @param vhAddress address of the virtual host
+     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param directive the directive to remove
+     */
+    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+            throws ApacheManagerException {
+        logger.debug("removeDirectiveInVhostIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ","
+                + directiveArg + ")");
+
+        if (isVhostExist(vhAddress, vhNameServer)) {
+            String vhostFile = getVhostConfigurationFile(vhAddress, vhNameServer);
+            List<String> fileStringList = loadConfigurationFile(vhostFile);
+            List<String> newFileStringList = new LinkedList<String>();
+
+            String line = directive + " " + directiveArg;
+            boolean found = false;
+            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+                String string = iterator.next();
+                if (string.contains(line)) {
+                    found = true;
+                } else {
+                    newFileStringList.add(string);
+                }
+            }
+            if (!found) {
+                throw new ApacheManagerException("Cannot remove the directive : there is no directive \"" + directive
+                        + " " + directiveArg + "\" in the Virtual Host configuration file (" + vhostFile + ").");
+            }
+
+            flushConfigurationFile(vhostFile, newFileStringList);
+        } else {
+            throw new ApacheManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
+                    + ") does not exist");
+        }
     }
 
 }
