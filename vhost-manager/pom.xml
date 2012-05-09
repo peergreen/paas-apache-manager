@@ -41,7 +41,7 @@
     <name>JPaaS :: Apache Manager :: Vhost Manager</name>
     <modules>
         <module>api</module>
-        <module>ejb</module>
+        <module>osgi</module>
     </modules>
 
 
