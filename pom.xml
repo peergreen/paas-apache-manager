@@ -70,6 +70,7 @@
     <modules>
         <module>vhost-manager</module>
         <module>proxy-manager</module>
+        <module>util</module>
     </modules>
 
 </project>
