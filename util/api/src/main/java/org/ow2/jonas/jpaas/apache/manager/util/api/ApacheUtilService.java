@@ -64,4 +64,10 @@ public interface ApacheUtilService {
          */
         public String getVhostConfigurationFile(String vhAddress, String vhNameServer);
 
+    /**
+         * If it is not done, write a directive in Apache configuration file
+         * to include the Virtual Host configuration folder.
+         */
+        public void includeVhostFolderIfNecessary();
+
 }

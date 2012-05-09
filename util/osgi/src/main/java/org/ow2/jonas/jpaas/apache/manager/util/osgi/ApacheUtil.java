@@ -105,7 +105,6 @@ public class ApacheUtil implements ApacheUtilService {
     @Invalidate
     public void stop() throws Throwable {
         logger.debug("Stopping ApacheUtil.");
-
     }
 
 
@@ -226,6 +225,30 @@ public class ApacheUtil implements ApacheUtilService {
         //Replace "*" and ":" in the file name to avoid problem with Apache
         vhostFile = vhostFile.replaceAll("\\*", "wildcard").replaceAll(":", "_");
         return vhostFile;
+    }
+
+    /**
+     * If it is not done, write a directive in Apache configuration file
+     * to include the Virtual Host configuration folder.
+     */
+    public void includeVhostFolderIfNecessary() {
+        logger.debug("includeVhostFolderIfNecessary ()");
+        List<String> fileStringList = loadConfigurationFile(apacheConfigurationFile);
+        List<String> newFileStringList = new LinkedList<String>();
+        boolean found = false;
+
+        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.contains("Include " + vhostConfigurationFolder + "/*.conf")) {
+                found = true;
+            }
+            newFileStringList.add(string);
+        }
+        if (!found) {
+            newFileStringList.add("Include " + vhostConfigurationFolder + "/*.conf");
+        }
+
+        flushConfigurationFile(apacheConfigurationFile, newFileStringList);
     }
 
 }
