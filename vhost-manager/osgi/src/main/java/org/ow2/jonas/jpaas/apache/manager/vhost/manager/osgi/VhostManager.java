@@ -182,13 +182,7 @@ public class VhostManager implements VhostManagerService {
      */
     public void createDocumentRoot(String address, String serverName, String documentRoot) throws VhostManagerException {
         logger.debug("createDocumentRoot (" + address + "," + serverName + "," + documentRoot +")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            addDirectiveIfPossible(vhostFile, "DocumentRoot", documentRoot);
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
-        }
+        addDirectiveIfPossible(address, serverName, "DocumentRoot", documentRoot);
     }
 
     /**
@@ -201,13 +195,7 @@ public class VhostManager implements VhostManagerService {
      */
     public void deleteDocumentRoot(String address, String serverName) throws VhostManagerException {
         logger.debug("deleteDocumentRoot (" + address + "," + serverName + ")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            removeDirectiveIfPossible(vhostFile, "DocumentRoot");
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
-        }
+        removeDirectiveIfPossible(address, serverName, "DocumentRoot");
     }
 
     /**
@@ -246,17 +234,11 @@ public class VhostManager implements VhostManagerService {
      */
     public void createServerAlias(String address, String serverName, List<String> serverAlias) throws VhostManagerException {
         logger.debug("createServerAlias (" + address + "," + serverName + "," + serverAlias.toString() + ")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            String serverAliasArgs = "";
-            for (String value : serverAlias) {
-                serverAliasArgs =  serverAliasArgs + " " + value;
-            }
-            addDirectiveIfPossible(vhostFile, "ServerAlias", serverAliasArgs);
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
+        String serverAliasArgs = "";
+        for (String value : serverAlias) {
+            serverAliasArgs =  serverAliasArgs + " " + value;
         }
+        addDirectiveIfPossible(address, serverName, "ServerAlias", serverAliasArgs);
     }
 
     /**
@@ -269,13 +251,9 @@ public class VhostManager implements VhostManagerService {
      */
     public void deleteServerAlias(String address, String serverName) throws VhostManagerException {
         logger.debug("deleteServerAlias (" + address + "," + serverName + ")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            removeDirectiveIfPossible(vhostFile, "ServerAlias");
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
-        }
+
+        removeDirectiveIfPossible(address, serverName, "ServerAlias");
+
     }
 
     /**
@@ -312,13 +290,7 @@ public class VhostManager implements VhostManagerService {
      */
     public void createServerPath(String address, String serverName, String serverPath) throws VhostManagerException {
         logger.debug("createServerPath (" + address + "," + serverName + "," + serverPath + ")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            addDirectiveIfPossible(vhostFile, "ServerPath", serverPath);
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
-        }
+        addDirectiveIfPossible(address, serverName, "ServerPath", serverPath);
     }
 
     /**
@@ -330,73 +302,84 @@ public class VhostManager implements VhostManagerService {
      */
     public void deleteServerPath(String address, String serverName) throws VhostManagerException {
         logger.debug("deleteServerPath (" + address + "," + serverName + ")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
-            removeDirectiveIfPossible(vhostFile, "ServerPath");
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
-        }
+        removeDirectiveIfPossible(address, serverName, "ServerPath");
     }
 
 
     /**
      *  Add a directive at the beginning of a Virtual Host block, if the specified directive is not already present
-     * @param file the virtual host file
+     * @param vhAddress    address of the virtual host
+     * @param vhNameServer value of the ServerName directive
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
      */
-    private void addDirectiveIfPossible(String file, String directive, String directiveArg) throws VhostManagerException {
-        logger.debug("addDirectiveIfPossible (" + file + "," + directive + "," + directiveArg  +")");
+    private void addDirectiveIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+            throws VhostManagerException {
+        logger.debug("addDirectiveIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ","
+                + directiveArg  +")");
 
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(file);
-        List<String> newFileStringList = new LinkedList<String>();
+        if (apacheUtilService.isVhostExist(vhAddress, vhNameServer)) {
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhNameServer);
+            List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
+            List<String> newFileStringList = new LinkedList<String>();
 
-        String line = directive + " " + directiveArg;
-        boolean found = false;
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
-            if (string.contains(line)) {
-                found = true;
+            String line = directive + " " + directiveArg;
+            boolean found = false;
+            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+                String string = iterator.next();
+                if (string.contains(line)) {
+                    found = true;
+                }
+                newFileStringList.add(string);
             }
-            newFileStringList.add(string);
-        }
-        if (!found) {
-            newFileStringList.add(VHOST_FIRST_LINE_INDEX, line);
-        } else {
-            throw new VhostManagerException("Cannot add the directive : a directive \"" + directive + "\" is " +
-                    "already present");
-        }
+            if (!found) {
+                newFileStringList.add(VHOST_FIRST_LINE_INDEX, line);
+            } else {
+                throw new VhostManagerException("Cannot add the directive : a directive \"" + directive + "\" is " +
+                        "already present");
+            }
 
-        apacheUtilService.flushConfigurationFile(file, newFileStringList);
+            apacheUtilService.flushConfigurationFile(vhostFile, newFileStringList);
+        } else {
+            throw new VhostManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
+                    + ") does not exist");
+        }
     }
 
     /**
      *  Remove a directive of a Virtual Host block, if the specified directive is present
-     * @param file the virtual host file
+     * @param vhAddress    address of the virtual host
+     * @param vhNameServer value of the ServerName directive
      * @param directive the directive to remove
      */
-    private void removeDirectiveIfPossible(String file, String directive) throws VhostManagerException {
-        logger.debug("removeDirectiveIfPossible (" + file + "," + directive + ")");
+    private void removeDirectiveIfPossible(String vhAddress, String vhNameServer, String directive)
+            throws VhostManagerException {
+        logger.debug("removeDirectiveIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ")");
 
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(file);
-        List<String> newFileStringList = new LinkedList<String>();
+        if (apacheUtilService.isVhostExist(vhAddress, vhNameServer)) {
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhNameServer);
+            List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
+            List<String> newFileStringList = new LinkedList<String>();
 
-        boolean found = false;
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
-            if (string.contains(directive)) {
-                found = true;
-            } else {
-                newFileStringList.add(string);
+            boolean found = false;
+            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+                String string = iterator.next();
+                if (string.contains(directive)) {
+                    found = true;
+                } else {
+                    newFileStringList.add(string);
+                }
             }
-        }
-        if (!found) {
-            throw new VhostManagerException("Cannot remove the directive : there is no directive \"" + directive + "\""
-                    + " in the Virtual Host configuration file (" + file + ").");
-        }
+            if (!found) {
+                throw new VhostManagerException("Cannot remove the directive : there is no directive \"" + directive + "\""
+                        + " in the Virtual Host configuration file (" + vhostFile + ").");
+            }
 
-        apacheUtilService.flushConfigurationFile(file, newFileStringList);
+            apacheUtilService.flushConfigurationFile(vhostFile, newFileStringList);
+        } else {
+            throw new VhostManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
+                    + ") does not exist");
+        }
     }
 
 
