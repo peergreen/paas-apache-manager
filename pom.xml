@@ -69,6 +69,7 @@
 
     <modules>
         <module>vhost-manager</module>
+        <module>proxy-manager</module>
     </modules>
 
 </project>
