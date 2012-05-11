@@ -34,62 +34,62 @@ public interface ProxyManagerService {
 
     /**
      * Create a ProxyPass directive
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @throws ProxyManagerException
      */
-    public void createProxyPass(String firstArg, String secondArg) throws ProxyManagerException;
+    public void createProxyPass(String path, String url) throws ProxyManagerException;
 
     /**
      * Create a ProxyPass directive in a Virtual Host
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
      * @throws ProxyManagerException
      */
-    public void createProxyPass(String firstArg, String secondArg, String vhAddress) throws ProxyManagerException;
+    public void createProxyPass(String path, String url, String vhAddress) throws ProxyManagerException;
 
     /**
      * Create a ProxyPass directive in a Name-based Virtual Host
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive
      * @throws ProxyManagerException
      */
-    public void createProxyPass(String firstArg, String secondArg, String vhAddress, String vhServerName)
+    public void createProxyPass(String path, String url, String vhAddress, String vhServerName)
             throws ProxyManagerException;
 
 
     /**
      * Delete a ProxyPass directive
      *
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @throws ProxyManagerException
      */
-    public void deleteProxyPass(String firstArg, String secondArg) throws ProxyManagerException;
+    public void deleteProxyPass(String path, String url) throws ProxyManagerException;
 
     /**
      * Delete a ProxyPass directive in a Virtual Host
      *
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
      * @throws ProxyManagerException
      */
-    public void deleteProxyPass(String firstArg, String secondArg, String vhAddress) throws ProxyManagerException;
+    public void deleteProxyPass(String path, String url, String vhAddress) throws ProxyManagerException;
 
     /**
      * Delete a ProxyPass directive in a Name-based Virtual Host
      *
-     * @param firstArg value of the ProxyPass first argument (path)
-     * @param secondArg  value of the ProxyPass second argument (url)
+     * @param path value of the ProxyPass first argument (path)
+     * @param url  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive
      * @throws ProxyManagerException
      */
-    public void deleteProxyPass(String firstArg, String secondArg, String vhAddress, String vhServerName)
+    public void deleteProxyPass(String path, String url, String vhAddress, String vhServerName)
             throws ProxyManagerException;
 
 }
