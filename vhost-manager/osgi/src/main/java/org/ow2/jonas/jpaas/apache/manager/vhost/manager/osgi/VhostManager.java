@@ -120,10 +120,11 @@ public class VhostManager implements VhostManagerService {
      *
      * @param address address of the virtual host
      * @throws VhostManagerException
+     * @return the Virtual Host ID
      */
-    public void createVirtualHost(String address) throws VhostManagerException {
+    public long createVirtualHost(String address) throws VhostManagerException {
         logger.debug("createVirtualHost (" + address + ")");
-        createVirtualHost(address, null);
+        return createVirtualHost(address, null);
     }
 
     /**
@@ -143,8 +144,9 @@ public class VhostManager implements VhostManagerService {
      * @param address    address of the virtual host
      * @param serverName value of the ServerName directive
      * @throws VhostManagerException
+     * @return the Virtual Host ID
      */
-    public void createVirtualHost(String address, String serverName) throws VhostManagerException {
+    public long createVirtualHost(String address, String serverName) throws VhostManagerException {
         logger.debug("createVirtualHost (" + address + "," + serverName +")");
         if (apacheUtilService.isVhostExist(address, serverName)) {
             throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") is" +
@@ -158,8 +160,10 @@ public class VhostManager implements VhostManagerService {
                 fileStringList.add("ServerName " + serverName);
             }
             fileStringList.add("</VirtualHost>");
-            String vhostFile = getNewVhostFile();
+            long vhostID = getAvailableID();
+            String vhostFile = getVhostFileFromID(vhostID);
             apacheUtilService.flushConfigurationFile(vhostFile, fileStringList);
+            return vhostID;
         }
 
     }
@@ -445,8 +449,8 @@ public class VhostManager implements VhostManagerService {
      * Return the path of a new vhost file with a correct ID
      * @return vhost file path
      */
-    private synchronized String getNewVhostFile() {
-        long newID = getAvailableID();
+    private synchronized String getVhostFileFromID(long id) {
+        long newID = id;
         String fileName = "vh-" + String.valueOf(newID) + ".conf";
         String filePath = vhostConfigurationFolder + "/" +  fileName;
         return filePath;

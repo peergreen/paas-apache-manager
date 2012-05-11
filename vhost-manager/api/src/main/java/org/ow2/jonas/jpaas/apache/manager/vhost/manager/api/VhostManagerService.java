@@ -40,8 +40,9 @@ public interface VhostManagerService {
      *
      * @param address address of the virtual host
      * @throws VhostManagerException
+     * @return the Virtual Host ID
      */
-    void createVirtualHost(String address) throws VhostManagerException;
+    long createVirtualHost(String address) throws VhostManagerException;
 
     /**
      * Delete a Virtual Host block directive
@@ -57,8 +58,9 @@ public interface VhostManagerService {
      * @param address address of the virtual host
      * @param serverName value of the ServerName directive
      * @throws VhostManagerException
+     * @return the Virtual Host ID
      */
-    void createVirtualHost(String address, String serverName) throws VhostManagerException;
+    long createVirtualHost(String address, String serverName) throws VhostManagerException;
 
     /**
      * Delete a Name-based Virtual Host block directive
