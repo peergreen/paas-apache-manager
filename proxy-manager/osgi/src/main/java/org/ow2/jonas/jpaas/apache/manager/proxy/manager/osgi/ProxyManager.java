@@ -127,31 +127,31 @@ public class ProxyManager implements ProxyManagerService {
     /**
      * Create a ProxyPass directive in a Virtual Host
      *
+     * @param vhAddress address of the virtual host
      * @param path  value of the ProxyPass first argument (path)
      * @param url value of the ProxyPass second argument (url)
-     * @param vhAddress address of the virtual host
      * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
      *
      */
     @Override
-    public void createProxyPass(String path, String url, String vhAddress) throws ProxyManagerException {
-        logger.debug("createProxyPass (" + path + "," + url + "," + vhAddress + ")");
-        createProxyPass(path, url, vhAddress, null);
+    public void createVhostProxyPass(String vhAddress, String path, String url) throws ProxyManagerException {
+        logger.debug("createVhostProxyPass (" + vhAddress + "," + path + "," + url + ")");
+        createVhostProxyPass(vhAddress, null, path, url);
     }
 
     /**
      * Create a ProxyPass directive in a Name-based Virtual Host
      *
-     * @param path     value of the ProxyPass first argument (path)
-     * @param url    value of the ProxyPass second argument (url)
      * @param vhAddress    address of the virtual host
      * @param vhServerName value of the ServerName directive
+     * @param path     value of the ProxyPass first argument (path)
+     * @param url    value of the ProxyPass second argument (url)
      * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
      *
      */
     @Override
-    public void createProxyPass(String path, String url, String vhAddress, String vhServerName) throws ProxyManagerException {
-        logger.debug("createProxyPass (" + path + "," + url + "," + vhAddress + "," + vhServerName + ")");
+    public void createVhostProxyPass(String vhAddress, String vhServerName, String path, String url) throws ProxyManagerException {
+        logger.debug("createVhostProxyPass (" + vhAddress + "," + vhServerName + "," + path + "," + url + ")");
 
         String directiveArgs = path + " " + url;
         try {
@@ -162,8 +162,27 @@ public class ProxyManager implements ProxyManagerService {
     }
 
     /**
-     * Delete a ProxyPass directive
+     * Create a ProxyPass directive in a Name-based Virtual Host
      *
+     * @param vhostID ID of the virtual host
+     * @param path    value of the ProxyPass first argument (path)
+     * @param url     value of the ProxyPass second argument (url)
+     * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
+     *
+     */
+    public void createVhostProxyPass(long vhostID, String path, String url) throws ProxyManagerException {
+        logger.debug("createVhostProxyPass (" + String.valueOf(vhostID) + "," + path + "," + url + ")");
+
+        String directiveArgs = path + " " + url;
+        try {
+            apacheUtilService.addDirectiveInVhost(vhostID, "ProxyPass", directiveArgs);
+        } catch (ApacheManagerException e) {
+            throw new ProxyManagerException(e.getMessage());
+        }
+    }
+
+    /**
+     * Delete a ProxyPass directive
      *
      * @param path  value of the ProxyPass first argument (path)
      * @param url value of the ProxyPass second argument (url)
@@ -172,7 +191,7 @@ public class ProxyManager implements ProxyManagerService {
      */
     @Override
     public void deleteProxyPass(String path, String url) throws ProxyManagerException {
-        logger.debug("removeProxyPass (" + path + "," + url + ")");
+        logger.debug("deleteProxyPass (" + path + "," + url + ")");
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
         String line = "ProxyPass " + path + " " + url;
@@ -196,38 +215,55 @@ public class ProxyManager implements ProxyManagerService {
     /**
      * Delete a ProxyPass directive in a Virtual Host
      *
-     *
+     * @param vhAddress address of the virtual host
      * @param path  value of the ProxyPass first argument (path)
      * @param url value of the ProxyPass second argument (url)
-     * @param vhAddress address of the virtual host
      * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
      *
      */
     @Override
-    public void deleteProxyPass(String path, String url, String vhAddress) throws ProxyManagerException {
-        logger.debug("deleteProxyPass (" + path + "," + url + "," + vhAddress + ")");
-        deleteProxyPass(path, url, vhAddress, null);
+    public void deleteVhostProxyPass(String vhAddress, String path, String url) throws ProxyManagerException {
+        logger.debug("deleteVhostProxyPass (" + vhAddress + "," + path + "," + url + ")");
+        deleteVhostProxyPass(vhAddress, null, path, url);
     }
 
     /**
      * Delete a ProxyPass directive in a Name-based Virtual Host
      *
-     *
-     * @param path     value of the ProxyPass first argument (path)
-     * @param url    value of the ProxyPass second argument (url)
      * @param vhAddress    address of the virtual host
      * @param vhServerName value of the ServerName directive
+     * @param path     value of the ProxyPass first argument (path)
+     * @param url    value of the ProxyPass second argument (url)
      * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
      *
      */
     @Override
-    public void deleteProxyPass(String path, String url, String vhAddress, String vhServerName)
+    public void deleteVhostProxyPass(String vhAddress, String vhServerName, String path, String url)
             throws ProxyManagerException {
 
-        logger.debug("deleteProxyPass (" + path + "," + url + "," + vhAddress + "," + vhServerName + ")");
+        logger.debug("deleteVhostProxyPass (" + vhAddress + "," + vhServerName + "," + path + "," + url + ")");
         String directiveArgs = path + " " + url;
         try {
             apacheUtilService.removeDirectiveInVhostIfPossible(vhAddress, vhServerName, "ProxyPass", directiveArgs);
+        } catch (ApacheManagerException e) {
+            throw new ProxyManagerException(e.getMessage());
+        }
+    }
+
+    /**
+     * Delete a ProxyPass directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @param path    value of the ProxyPass first argument (path)
+     * @param url     value of the ProxyPass second argument (url)
+     * @throws org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException
+     *
+     */
+    public void deleteVhostProxyPass(long vhostID, String path, String url) throws ProxyManagerException {
+        logger.debug("deleteVhostProxyPass (" + String.valueOf(vhostID) + "," + path + "," + url + ")");
+        String directiveArgs = path + " " + url;
+        try {
+            apacheUtilService.removeDirectiveInVhostIfPossible(vhostID, "ProxyPass", directiveArgs);
         } catch (ApacheManagerException e) {
             throw new ProxyManagerException(e.getMessage());
         }
