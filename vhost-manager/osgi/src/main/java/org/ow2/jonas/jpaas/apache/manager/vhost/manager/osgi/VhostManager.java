@@ -32,6 +32,7 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerException;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerService;
@@ -40,9 +41,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
+
 
 /**
  * The OSGi implementation of the VhostManagerService Interface
@@ -65,6 +69,11 @@ public class VhostManager implements VhostManagerService {
      */
     private static final int VHOST_FIRST_LINE_INDEX = 2;
 
+    /**
+     * Path to the virtual host configuration folder
+     */
+    private String vhostConfigurationFolder;
+
     @Requires
     private ApacheUtilService apacheUtilService;
 
@@ -72,11 +81,37 @@ public class VhostManager implements VhostManagerService {
     @Validate
     public void start() {
         logger.info("Starting VhostManager");
+        vhostConfigurationFolder = apacheUtilService.getVhostConfigurationFolder();
     }
 
     @Invalidate
     public void stop() throws Throwable {
         logger.debug("Stopping VhostManager");
+    }
+
+    /**
+     * If it is not done, write a directive in Apache configuration file
+     * to include the Virtual Host configuration folder.
+     */
+    public void includeVhostFolderIfNecessary() {
+        logger.debug("includeVhostFolderIfNecessary ()");
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(
+                apacheUtilService.getApacheConfigurationFile());
+        List<String> newFileStringList = new LinkedList<String>();
+        boolean found = false;
+
+        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.contains("Include " + vhostConfigurationFolder  + "/*.conf")) {
+                found = true;
+            }
+            newFileStringList.add(string);
+        }
+        if (!found) {
+            newFileStringList.add("Include " + vhostConfigurationFolder + "/*.conf");
+        }
+
+        apacheUtilService.flushConfigurationFile(apacheUtilService.getApacheConfigurationFile(), newFileStringList);
     }
 
 
@@ -115,7 +150,7 @@ public class VhostManager implements VhostManagerService {
             throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") is" +
                     " already present");
         } else {
-            apacheUtilService.includeVhostFolderIfNecessary();
+            includeVhostFolderIfNecessary();
             List<String> fileStringList = new LinkedList<String>();
             fileStringList.add("NameVirtualHost " + address);
             fileStringList.add("<VirtualHost " + address + ">");
@@ -123,7 +158,7 @@ public class VhostManager implements VhostManagerService {
                 fileStringList.add("ServerName " + serverName);
             }
             fileStringList.add("</VirtualHost>");
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
+            String vhostFile = getNewVhostFile();
             apacheUtilService.flushConfigurationFile(vhostFile, fileStringList);
         }
 
@@ -139,13 +174,12 @@ public class VhostManager implements VhostManagerService {
     public void deleteVirtualHost(String address, String serverName) throws VhostManagerException {
         logger.debug("deleteVirtualHost (" + address + "," + serverName +")");
 
-        if (apacheUtilService.isVhostExist(address, serverName)) {
+        try {
             String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
             File file = new File(vhostFile);
             file.delete();
-        } else {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") does" +
-                    " not exist");
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
         }
     }
 
@@ -309,23 +343,26 @@ public class VhostManager implements VhostManagerService {
     /**
      *  Add a directive at the beginning of a Virtual Host block, if the specified directive is not already present
      * @param vhAddress    address of the virtual host
-     * @param vhNameServer value of the ServerName directive
+     * @param vhServerName value of the ServerName directive
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
+     * @throws VhostManagerException
      */
-    private void addDirectiveIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+    private void addDirectiveIfPossible(String vhAddress, String vhServerName, String directive, String directiveArg)
             throws VhostManagerException {
-        logger.debug("addDirectiveIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ","
+        logger.debug("addDirectiveIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ","
                 + directiveArg  +")");
 
-        if (apacheUtilService.isVhostExist(vhAddress, vhNameServer)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhNameServer);
+        try {
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhServerName);
+
             List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
 
             String line = directive + " " + directiveArg;
             boolean found = false;
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            Iterator<String> iterator;
+            for (iterator = fileStringList.iterator(); iterator.hasNext();) {
                 String string = iterator.next();
                 if (string.contains(line)) {
                     found = true;
@@ -340,29 +377,31 @@ public class VhostManager implements VhostManagerService {
             }
 
             apacheUtilService.flushConfigurationFile(vhostFile, newFileStringList);
-        } else {
-            throw new VhostManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
-                    + ") does not exist");
+
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
         }
     }
 
     /**
      *  Remove a directive of a Virtual Host block, if the specified directive is present
      * @param vhAddress    address of the virtual host
-     * @param vhNameServer value of the ServerName directive
+     * @param vhServerName value of the ServerName directive
      * @param directive the directive to remove
+     * @throws VhostManagerException
      */
-    private void removeDirectiveIfPossible(String vhAddress, String vhNameServer, String directive)
+    private void removeDirectiveIfPossible(String vhAddress, String vhServerName, String directive)
             throws VhostManagerException {
-        logger.debug("removeDirectiveIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ")");
+        logger.debug("removeDirectiveIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ")");
 
-        if (apacheUtilService.isVhostExist(vhAddress, vhNameServer)) {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhNameServer);
+        try {
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhServerName);
             List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
 
             boolean found = false;
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            Iterator<String> iterator;
+            for (iterator = fileStringList.iterator(); iterator.hasNext();) {
                 String string = iterator.next();
                 if (string.contains(directive)) {
                     found = true;
@@ -376,11 +415,41 @@ public class VhostManager implements VhostManagerService {
             }
 
             apacheUtilService.flushConfigurationFile(vhostFile, newFileStringList);
-        } else {
-            throw new VhostManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
-                    + ") does not exist");
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
         }
     }
 
+    /**
+     * Get an ID which can be used for a new Virtual Host
+     * @return an ID
+     */
+    private synchronized long getAvailableID() {
+        String [] fileList = new File(apacheUtilService.getVhostConfigurationFolder()).list();
+        Pattern p = Pattern.compile(apacheUtilService.getVhostFileTemplate());
+        long maxID = 0;
+        for (String fileName : fileList) {
+            Matcher m = p.matcher(fileName);
+            if (m.matches()) {
+                long currentID;
+                currentID = Long.parseLong(m.group(1));
+                if (currentID > maxID) {
+                    maxID = currentID;
+                }
+            }
+        }
+        return maxID + 1;
+    }
+
+    /**
+     * Return the path of a new vhost file with a correct ID
+     * @return vhost file path
+     */
+    private synchronized String getNewVhostFile() {
+        long newID = getAvailableID();
+        String fileName = "vh-" + String.valueOf(newID) + ".conf";
+        String filePath = vhostConfigurationFolder + "/" +  fileName;
+        return filePath;
+    }
 
 }

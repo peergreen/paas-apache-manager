@@ -51,41 +51,55 @@ public interface ApacheUtilService {
     /**
      * Test if a virtual host exists
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return
      */
-    public boolean isVhostExist(String vhAddress, String vhNameServer);
+    public boolean isVhostExist(String vhAddress, String vhServerName);
 
     /**
      * Return the path of a Virtual Host configuration file
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return path of the Virtual Host configuration file
      */
-    public String getVhostConfigurationFile(String vhAddress, String vhNameServer);
-
-    /**
-     * If it is not done, write a directive in Apache configuration file
-     * to include the Virtual Host configuration folder.
-     */
-    public void includeVhostFolderIfNecessary();
+    public String getVhostConfigurationFile(String vhAddress, String vhServerName) throws ApacheManagerException;
 
     /**
      *  Add a directive at the end of a Virtual Host block.
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
      */
-    public void addDirectiveInVhost(String vhAddress, String vhNameServer, String directive, String directiveArg) throws ApacheManagerException;
+    public void addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg) throws ApacheManagerException;
 
     /**
      *  Remove a directive of a Virtual Host block.  if the specified directive is present
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to remove
      */
-    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhServerName, String directive, String directiveArg)
             throws ApacheManagerException;
+
+    /**
+     *
+     * @return the path of the vhost folder
+     */
+    public String getVhostConfigurationFolder();
+
+
+    /**
+     *
+     * @return the path of the apache configuration file
+     */
+    public String getApacheConfigurationFile();
+
+
+    /**
+     *
+     * @return the vhost file template
+     */
+    public String getVhostFileTemplate();
 
 }

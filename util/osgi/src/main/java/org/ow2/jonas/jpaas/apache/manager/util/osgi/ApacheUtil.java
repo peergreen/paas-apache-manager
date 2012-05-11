@@ -48,6 +48,8 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The OSGi implementation of the ApacheUtilService Interface
@@ -88,6 +90,11 @@ public class ApacheUtil implements ApacheUtilService {
      * VhostManager property file name
      */
     private static final String APACHE_MANAGER_PROPERTY_FILE_NAME = "apachemanager.properties";
+
+    /**
+     * Virtual Host file name template
+     */
+    private static final String VHOST_FILE_TEMPLATE = "vh-(\\d*).conf";
 
 
     @Validate
@@ -199,72 +206,83 @@ public class ApacheUtil implements ApacheUtilService {
     /**
      * Test if a virtual host exists
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return
      */
-    public boolean isVhostExist(String vhAddress, String vhNameServer) {
-        String vhostFile = getVhostConfigurationFile(vhAddress, vhNameServer);
-        File f = new File(vhostFile);
-        return f.exists();
+    public boolean isVhostExist(String vhAddress, String vhServerName) {
+        boolean result = false;
+        String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
+
+        for (String fileName : fileList) {
+            List<String> fileContentList = loadConfigurationFile(vhostConfigurationFolder + "/" + fileName);
+            String fileContentString = fileContentList.toString();
+            if (vhServerName == null) {
+                if (fileContentString.contains("<VirtualHost " + vhAddress + ">")) {
+                    result=true;
+                    break;
+                }
+            } else {
+                if (fileContentString.contains("<VirtualHost " + vhAddress + ">") &&
+                        fileContentString.contains("ServerName " + vhServerName)) {
+                    result=true;
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     /**
      * Return the path of a Virtual Host configuration file
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return path of the Virtual Host configuration file
      */
-    public String getVhostConfigurationFile(String vhAddress, String vhNameServer) {
-        String vhostFile;
-        if (vhNameServer == null) {
-            logger.debug("getVhostConfigurationFile (" + vhAddress + ", null)");
-            vhostFile = vhostConfigurationFolder + File.separator + "vh-" + vhAddress + ".conf";
-        } else {
-            logger.debug("getVhostConfigurationFile (" + vhAddress + "," + vhNameServer + ")");
-            vhostFile = vhostConfigurationFolder + File.separator + "vh-" + vhAddress + "-" + vhNameServer + ".conf";
-        }
-        //Replace "*" and ":" in the file name to avoid problem with Apache
-        vhostFile = vhostFile.replaceAll("\\*", "wildcard").replaceAll(":", "_");
-        return vhostFile;
-    }
+    public String getVhostConfigurationFile(String vhAddress, String vhServerName) throws ApacheManagerException {
+        String vhostFile = null;
+        boolean vhostFound = false;
+        String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
 
-    /**
-     * If it is not done, write a directive in Apache configuration file
-     * to include the Virtual Host configuration folder.
-     */
-    public void includeVhostFolderIfNecessary() {
-        logger.debug("includeVhostFolderIfNecessary ()");
-        List<String> fileStringList = loadConfigurationFile(apacheConfigurationFile);
-        List<String> newFileStringList = new LinkedList<String>();
-        boolean found = false;
-
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
-            if (string.contains("Include " + vhostConfigurationFolder + "/*.conf")) {
-                found = true;
+        for (String fileName : fileList) {
+            List<String> fileContentList = loadConfigurationFile(vhostConfigurationFolder + "/" + fileName);
+            String fileContentString = fileContentList.toString();
+            if (vhServerName == null) {
+                if (fileContentString.contains("<VirtualHost " + vhAddress + ">")) {
+                    vhostFound = true;
+                    vhostFile = vhostConfigurationFolder + "/" + fileName;
+                    break;
+                }
+            } else {
+                if (fileContentString.contains("<VirtualHost " + vhAddress + ">") &&
+                        fileContentString.contains("ServerName " + vhServerName)) {
+                    vhostFound = true;
+                    vhostFile = vhostConfigurationFolder + "/" + fileName;
+                    break;
+                }
             }
-            newFileStringList.add(string);
         }
-        if (!found) {
-            newFileStringList.add("Include " + vhostConfigurationFolder + "/*.conf");
+        if (!vhostFound) {
+            throw new ApacheManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhServerName
+                    + ") does not exist");
+        } else {
+            return vhostFile;
         }
-
-        flushConfigurationFile(apacheConfigurationFile, newFileStringList);
     }
+
+
 
     /**
      *  Add a directive at the end of a Virtual Host block.
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
      */
-    public void addDirectiveInVhost(String vhAddress, String vhNameServer, String directive, String directiveArg) throws ApacheManagerException {
-        logger.debug("addDirectiveInVhost (" + vhAddress + "," + vhNameServer + "," + directive + "," + directiveArg
+    public void addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg) throws ApacheManagerException {
+        logger.debug("addDirectiveInVhost (" + vhAddress + "," + vhServerName + "," + directive + "," + directiveArg
                 + ")");
 
-        if (isVhostExist(vhAddress, vhNameServer)) {
-            String vhostFile = getVhostConfigurationFile(vhAddress, vhNameServer);
+            String vhostFile = getVhostConfigurationFile(vhAddress, vhServerName);
             List<String> fileStringList = loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
             String line = directive + " " + directiveArg;
@@ -280,25 +298,20 @@ public class ApacheUtil implements ApacheUtilService {
             }
 
             flushConfigurationFile(vhostFile, newFileStringList);
-        } else {
-            throw new ApacheManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
-                    + ") does not exist");
-        }
     }
 
     /**
      *  Remove a directive of a Virtual Host block.  if the specified directive is present
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the NameServer directive (null for a virtual host without NameServer directive)
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to remove
      */
-    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhNameServer, String directive, String directiveArg)
+    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhServerName, String directive, String directiveArg)
             throws ApacheManagerException {
-        logger.debug("removeDirectiveInVhostIfPossible (" + vhAddress + "," + vhNameServer + "," + directive + ","
+        logger.debug("removeDirectiveInVhostIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ","
                 + directiveArg + ")");
 
-        if (isVhostExist(vhAddress, vhNameServer)) {
-            String vhostFile = getVhostConfigurationFile(vhAddress, vhNameServer);
+            String vhostFile = getVhostConfigurationFile(vhAddress, vhServerName);
             List<String> fileStringList = loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
 
@@ -318,10 +331,16 @@ public class ApacheUtil implements ApacheUtilService {
             }
 
             flushConfigurationFile(vhostFile, newFileStringList);
-        } else {
-            throw new ApacheManagerException("The Virtual Host " + vhAddress + " (ServerName = " + vhNameServer
-                    + ") does not exist");
-        }
     }
+
+
+    /**
+     * @return the vhost file template
+     */
+    public String getVhostFileTemplate() {
+        return VHOST_FILE_TEMPLATE;
+    }
+
+
 
 }

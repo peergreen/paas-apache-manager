@@ -54,10 +54,10 @@ public interface ProxyManagerService {
      * @param firstArg value of the ProxyPass first argument (path)
      * @param secondArg  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the ServerName directive
+     * @param vhServerName value of the ServerName directive
      * @throws ProxyManagerException
      */
-    public void createProxyPass(String firstArg, String secondArg, String vhAddress, String vhNameServer)
+    public void createProxyPass(String firstArg, String secondArg, String vhAddress, String vhServerName)
             throws ProxyManagerException;
 
 
@@ -86,10 +86,10 @@ public interface ProxyManagerService {
      * @param firstArg value of the ProxyPass first argument (path)
      * @param secondArg  value of the ProxyPass second argument (url)
      * @param vhAddress address of the virtual host
-     * @param vhNameServer value of the ServerName directive
+     * @param vhServerName value of the ServerName directive
      * @throws ProxyManagerException
      */
-    public void deleteProxyPass(String firstArg, String secondArg, String vhAddress, String vhNameServer)
+    public void deleteProxyPass(String firstArg, String secondArg, String vhAddress, String vhServerName)
             throws ProxyManagerException;
 
 }
