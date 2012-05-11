@@ -52,9 +52,16 @@ public interface ApacheUtilService {
      * Test if a virtual host exists
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
-     * @return
+     * @return true if the Virtual Host exists
      */
-    public boolean isVhostExist(String vhAddress, String vhServerName);
+    public boolean isVhostExist(String vhAddress, String vhServerName) throws ApacheManagerException;
+
+    /**
+     * Test if a virtual host exists
+     * @param vhostID ID of the virtual host
+     * @return true if the Virtual Host exists
+     */
+    public boolean isVhostExist(long vhostID);
 
     /**
      * Return the path of a Virtual Host configuration file
@@ -65,13 +72,29 @@ public interface ApacheUtilService {
     public String getVhostConfigurationFile(String vhAddress, String vhServerName) throws ApacheManagerException;
 
     /**
+     * Return the path of a Virtual Host configuration file
+     * @param vhostID ID of the virtual host
+     * @return path of the Virtual Host configuration file
+     */
+    public String getVhostConfigurationFile(long vhostID) throws ApacheManagerException;
+
+    /**
      *  Add a directive at the end of a Virtual Host block.
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
      */
-    public void addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg) throws ApacheManagerException;
+    public void addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg)
+            throws ApacheManagerException;
+
+    /**
+     *  Add a directive at the end of a Virtual Host block.
+     * @param vhostID ID of the virtual host
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     */
+    public void addDirectiveInVhost(long vhostID, String directive, String directiveArg) throws ApacheManagerException;
 
     /**
      *  Remove a directive of a Virtual Host block.  if the specified directive is present
@@ -81,6 +104,24 @@ public interface ApacheUtilService {
      */
     public void removeDirectiveInVhostIfPossible(String vhAddress, String vhServerName, String directive, String directiveArg)
             throws ApacheManagerException;
+
+    /**
+     *  Remove a directive of a Virtual Host block.  if the specified directive is present
+     * @param vhostID ID of the virtual host
+     * @param directive the directive to remove
+     */
+    public void removeDirectiveInVhostIfPossible(long vhostID, String directive, String directiveArg)
+            throws ApacheManagerException;
+
+    /**
+     * Get a Virtual Host ID from its address and ServerName
+     * @param vhAddress
+     * @param vhServerName
+     * @return the Virtual host ID
+     * @throws ApacheManagerException
+     */
+    public long getVhostID(String vhAddress, String vhServerName) throws ApacheManagerException;
+
 
     /**
      *

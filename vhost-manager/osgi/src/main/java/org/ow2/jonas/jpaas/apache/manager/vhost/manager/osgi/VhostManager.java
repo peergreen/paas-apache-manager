@@ -148,24 +148,27 @@ public class VhostManager implements VhostManagerService {
      */
     public long createVirtualHost(String address, String serverName) throws VhostManagerException {
         logger.debug("createVirtualHost (" + address + "," + serverName +")");
-        if (apacheUtilService.isVhostExist(address, serverName)) {
-            throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") is" +
-                    " already present");
-        } else {
-            includeVhostFolderIfNecessary();
-            List<String> fileStringList = new LinkedList<String>();
-            fileStringList.add("NameVirtualHost " + address);
-            fileStringList.add("<VirtualHost " + address + ">");
-            if (serverName != null) {
-                fileStringList.add("ServerName " + serverName);
+        try {
+            if (apacheUtilService.isVhostExist(address, serverName)) {
+                throw new VhostManagerException("The Virtual Host " + address + " (ServerName = " + serverName + ") " +
+                        "is already present");
+            } else {
+                includeVhostFolderIfNecessary();
+                List<String> fileStringList = new LinkedList<String>();
+                fileStringList.add("NameVirtualHost " + address);
+                fileStringList.add("<VirtualHost " + address + ">");
+                if (serverName != null) {
+                    fileStringList.add("ServerName " + serverName);
+                }
+                fileStringList.add("</VirtualHost>");
+                long vhostID = getAvailableID();
+                String vhostFile = getVhostFileFromID(vhostID);
+                apacheUtilService.flushConfigurationFile(vhostFile, fileStringList);
+                return vhostID;
             }
-            fileStringList.add("</VirtualHost>");
-            long vhostID = getAvailableID();
-            String vhostFile = getVhostFileFromID(vhostID);
-            apacheUtilService.flushConfigurationFile(vhostFile, fileStringList);
-            return vhostID;
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
         }
-
     }
 
     /**
@@ -176,10 +179,26 @@ public class VhostManager implements VhostManagerService {
      * @throws VhostManagerException
      */
     public void deleteVirtualHost(String address, String serverName) throws VhostManagerException {
-        logger.debug("deleteVirtualHost (" + address + "," + serverName +")");
+        logger.debug("deleteVirtualHost (" + address + "," + serverName + ")");
+        try {
+            long vhostID = apacheUtilService.getVhostID(address, serverName);
+            deleteVirtualHost(vhostID);
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
+        }
+    }
+
+    /**
+     * Delete a Name-based Virtual Host block directive
+     *
+     * @param vhostID ID of the virtual host
+     * @throws VhostManagerException
+     */
+    public void deleteVirtualHost(long vhostID) throws VhostManagerException {
+        logger.debug("deleteVirtualHost (" + String.valueOf(vhostID) + ")");
 
         try {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(address, serverName);
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhostID);
             File file = new File(vhostFile);
             file.delete();
         } catch (ApacheManagerException e) {
@@ -234,6 +253,29 @@ public class VhostManager implements VhostManagerService {
     public void deleteDocumentRoot(String address, String serverName) throws VhostManagerException {
         logger.debug("deleteDocumentRoot (" + address + "," + serverName + ")");
         removeDirectiveIfPossible(address, serverName, "DocumentRoot");
+    }
+
+    /**
+     * Create a DocumentRoot directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @param documentRoot value of the DocumentRoot directive to create
+     * @throws VhostManagerException
+     */
+    public void createDocumentRoot(long vhostID, String documentRoot) throws VhostManagerException {
+        logger.debug("createDocumentRoot (" + String.valueOf(vhostID) + documentRoot +")");
+        addDirectiveIfPossible(vhostID, "DocumentRoot", documentRoot);
+    }
+
+    /**
+     * Delete a DocumentRoot directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @throws VhostManagerException
+     */
+    public void deleteDocumentRoot(long vhostID) throws VhostManagerException {
+        logger.debug("deleteDocumentRoot (" + String.valueOf(vhostID) + ")");
+        removeDirectiveIfPossible(vhostID, "DocumentRoot");
     }
 
     /**
@@ -295,6 +337,34 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
+     * Create a ServerAlias directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @param serverAlias argument(s) of the ServerAlias directive to create
+     * @throws VhostManagerException
+     */
+    public void createServerAlias(long vhostID, List<String> serverAlias) throws VhostManagerException {
+        logger.debug("createServerAlias (" + String.valueOf(vhostID) + "," + serverAlias.toString() + ")");
+        String serverAliasArgs = "";
+        for (String value : serverAlias) {
+            serverAliasArgs =  serverAliasArgs + " " + value;
+        }
+        addDirectiveIfPossible(vhostID, "ServerAlias", serverAliasArgs);
+    }
+
+    /**
+     * Delete a ServerAlias directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @throws VhostManagerException
+     */
+    public void deleteServerAlias(long vhostID) throws VhostManagerException {
+        logger.debug("deleteServerAlias (" + String.valueOf(vhostID) + ")");
+
+        removeDirectiveIfPossible(vhostID, "ServerAlias");
+    }
+
+    /**
      * Create a ServerPath directive in a Virtual Host
      *
      * @param address    address of the virtual host
@@ -343,6 +413,29 @@ public class VhostManager implements VhostManagerService {
         removeDirectiveIfPossible(address, serverName, "ServerPath");
     }
 
+    /**
+     * Create a ServerPath directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @param serverPath value of the ServerPath directive to create
+     * @throws VhostManagerException
+     */
+    public void createServerPath(long vhostID, String serverPath) throws VhostManagerException {
+        logger.debug("createServerPath (" + String.valueOf(vhostID) + "," + serverPath + ")");
+        addDirectiveIfPossible(vhostID, "ServerPath", serverPath);
+    }
+
+    /**
+     * Delete a ServerPath directive in a Name-based Virtual Host
+     *
+     * @param vhostID ID of the virtual host
+     * @throws VhostManagerException
+     */
+    public void deleteServerPath(long vhostID) throws VhostManagerException {
+        logger.debug("deleteServerPath (" + String.valueOf(vhostID) + ")");
+        removeDirectiveIfPossible(vhostID, "ServerPath");
+    }
+
 
     /**
      *  Add a directive at the beginning of a Virtual Host block, if the specified directive is not already present
@@ -358,7 +451,46 @@ public class VhostManager implements VhostManagerService {
                 + directiveArg  +")");
 
         try {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhServerName);
+            long vhostID = apacheUtilService.getVhostID(vhAddress, vhServerName);
+            addDirectiveIfPossible(vhostID, directive, directiveArg);
+
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
+        }
+    }
+
+    /**
+     *  Remove a directive of a Virtual Host block, if the specified directive is present
+     * @param vhAddress    address of the virtual host
+     * @param vhServerName value of the ServerName directive
+     * @param directive the directive to remove
+     * @throws VhostManagerException
+     */
+    private void removeDirectiveIfPossible(String vhAddress, String vhServerName, String directive)
+            throws VhostManagerException {
+        logger.debug("removeDirectiveIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ")");
+
+        try {
+            long vhostID = apacheUtilService.getVhostID(vhAddress, vhServerName);
+            removeDirectiveIfPossible(vhostID, directive);
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
+        }
+    }
+
+    /**
+     *  Add a directive at the beginning of a Virtual Host block, if the specified directive is not already present
+     * @param vhostID ID of the virtual host
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     * @throws VhostManagerException
+     */
+    private void addDirectiveIfPossible(long vhostID, String directive, String directiveArg)
+            throws VhostManagerException {
+        logger.debug("addDirectiveIfPossible (" + String.valueOf(vhostID) + "," + directive + "," + directiveArg  +")");
+
+        try {
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhostID);
 
             List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
@@ -389,17 +521,16 @@ public class VhostManager implements VhostManagerService {
 
     /**
      *  Remove a directive of a Virtual Host block, if the specified directive is present
-     * @param vhAddress    address of the virtual host
-     * @param vhServerName value of the ServerName directive
+     * @param vhostID ID of the virtual host
      * @param directive the directive to remove
      * @throws VhostManagerException
      */
-    private void removeDirectiveIfPossible(String vhAddress, String vhServerName, String directive)
+    private void removeDirectiveIfPossible(long vhostID, String directive)
             throws VhostManagerException {
-        logger.debug("removeDirectiveIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ")");
+        logger.debug("removeDirectiveIfPossible (" + String.valueOf(vhostID) + "," + directive + ")");
 
         try {
-            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhAddress, vhServerName);
+            String vhostFile = apacheUtilService.getVhostConfigurationFile(vhostID);
             List<String> fileStringList = apacheUtilService.loadConfigurationFile(vhostFile);
             List<String> newFileStringList = new LinkedList<String>();
 
