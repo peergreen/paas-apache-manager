@@ -37,13 +37,18 @@ import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerException;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerService;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.Vhost;
+import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.VhostList;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -587,4 +592,66 @@ public class VhostManager implements VhostManagerService {
         return filePath;
     }
 
+    /**
+     * Get the Virtual Host list
+     * @return  the Virtual Host list
+     * @throws VhostManagerException
+     */
+    public VhostList getVhostList() throws VhostManagerException {
+        String [] fileList = apacheUtilService.getVhostFileNameList();
+        Pattern idPattern = Pattern.compile(apacheUtilService.getVhostFileTemplate());
+        Pattern addressPattern = Pattern.compile("<VirtualHost (.*?)>");
+        Pattern serverNamePattern = Pattern.compile("ServerName (.*?)\n");
+        List<Vhost> vhostList = new LinkedList<Vhost>();
+        for (String fileName : fileList) {
+            String content = fileToString(vhostConfigurationFolder + "/" +  fileName);
+            Matcher matcher;
+            Long vhostID;
+            String address;
+            String serverName;
+            //get Virtual Host ID
+            matcher = idPattern.matcher(fileName);
+            matcher.find();
+            vhostID = Long.parseLong(matcher.group(1));
+
+            //get Virtual Host Address
+            matcher = addressPattern.matcher(content);
+            matcher.find();
+            address = matcher.group(1);
+
+            //get Virtual Host Address
+            matcher = serverNamePattern.matcher(content);
+            try {
+                matcher.find();
+                serverName = matcher.group(1);
+            } catch (IllegalStateException e) {
+                serverName = null;
+            }
+            vhostList.add(new Vhost(vhostID, address, serverName));
+        }
+
+        return new VhostList(vhostList);
+    }
+
+
+    public static String fileToString(String file) throws VhostManagerException {
+        String result = null;
+        DataInputStream in = null;
+
+        try {
+            File f = new File(file);
+            byte[] buffer = new byte[(int) f.length()];
+            in = new DataInputStream(new FileInputStream(f));
+            in.readFully(buffer);
+            result = new String(buffer);
+        } catch (IOException e) {
+            throw new VhostManagerException("Problem to read file " + file, e.getCause());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) { /* ignore it */
+            }
+        }
+        return result;
+    }
 }

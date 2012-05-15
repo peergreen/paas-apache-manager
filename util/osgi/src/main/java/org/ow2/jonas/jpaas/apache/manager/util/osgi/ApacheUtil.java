@@ -94,7 +94,7 @@ public class ApacheUtil implements ApacheUtilService {
     /**
      * Virtual Host file name template
      */
-    private static final String VHOST_FILE_TEMPLATE = "vh-(\\d*).conf";
+    private static final String VHOST_FILE_TEMPLATE = "vh-(\\d*)\\.conf";
 
 
     @Validate
@@ -374,7 +374,7 @@ public class ApacheUtil implements ApacheUtilService {
         long vhostID = 0;
         boolean vhostFound = false;
         String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
-        Pattern pattern = Pattern.compile("vh-(\\d*)\\.conf");
+        Pattern pattern = Pattern.compile(VHOST_FILE_TEMPLATE);
         Matcher matcher;
         for (String fileName : fileList) {
             List<String> fileContentList = loadConfigurationFile(vhostConfigurationFolder + "/" + fileName);
@@ -407,6 +407,12 @@ public class ApacheUtil implements ApacheUtilService {
         }
     }
 
-
+    /**
+     * Get a list of Virtual Host files name.
+     */
+    public String[] getVhostFileNameList() {
+        String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
+        return fileList;
+    }
 
 }

@@ -33,19 +33,45 @@
         <version>1.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>org.ow2.jonas.jpaas</groupId>
-    <artifactId>vhost-manager-api</artifactId>
+    <artifactId>vhost-manager-rest</artifactId>
     <packaging>bundle</packaging>
-    <name>JPaaS :: Apache Manager :: Vhost Manager :: API</name>
+    <name>JPaaS :: Apache Manager :: Vhost Manager :: REST</name>
 
     <dependencies>
         <dependency>
+            <groupId>org.ow2.jonas.jpaas</groupId>
+            <artifactId>vhost-manager-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.bundles</groupId>
+            <artifactId>ow2-util-log</artifactId>
+            <version>${ow2-bundles.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.ow2.jonas</groupId>
-            <artifactId>jaxrs-jersey-core</artifactId>
+            <artifactId>jonas-commons</artifactId>
             <version>${jonas.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo</artifactId>
+            <version>${ipojo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.ipojo.annotations</artifactId>
+            <version>${ipojo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.jonas.jpaas</groupId>
+            <artifactId>apache-manager-util-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 
     <build>
         <pluginManagement>
@@ -74,10 +100,27 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.*</Export-Package>
+                        <Import-Package>*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
+            <!-- iPOJO Maven Plugin Configuration  -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-ipojo-plugin</artifactId>
+                <version>${maven.ipojo.plugin.version}</version>
+                <configuration>
+                    <ignoreAnnotations>false</ignoreAnnotations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>ipojo-bundle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
 </project>

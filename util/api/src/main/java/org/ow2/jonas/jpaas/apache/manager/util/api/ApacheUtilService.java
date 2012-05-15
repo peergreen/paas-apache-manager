@@ -143,4 +143,9 @@ public interface ApacheUtilService {
      */
     public String getVhostFileTemplate();
 
+    /**
+     * Get a list of Virtual Host files name.
+     */
+    public String[] getVhostFileNameList();
+
 }

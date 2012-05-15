@@ -25,6 +25,8 @@
 
 package org.ow2.jonas.jpaas.apache.manager.vhost.manager.api;
 
+import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.VhostList;
+
 import java.util.List;
 
 /**
@@ -247,5 +249,12 @@ public interface VhostManagerService {
      * @throws VhostManagerException
      */
     public void deleteServerPath(long vhostID) throws VhostManagerException;
+
+    /**
+     * Get the Virtual Host list
+     * @return  the Virtual Host list
+     * @throws VhostManagerException
+     */
+    public VhostList getVhostList() throws VhostManagerException;
 
 }

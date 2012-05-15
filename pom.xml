@@ -65,6 +65,7 @@
         <ipojo.version>1.8.0</ipojo.version>
         <easybeans-osgi-version>1.2.4</easybeans-osgi-version>
         <maven.compiler.plugin.version>2.3.2</maven.compiler.plugin.version>
+        <jersey.rest.client>1.9.1</jersey.rest.client>
     </properties>
 
     <modules>
