@@ -3,7 +3,7 @@
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   - JPaaS
   - Copyright (C) 2012 Bull S.A.S.
-  - Contact: jasmine@ow2.org
+  - Contact: jonas-team@ow2.org
   -
   - This library is free software; you can redistribute it and/or
   - modify it under the terms of the GNU Lesser General Public
@@ -22,28 +22,12 @@
   -
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   - $Id$
-  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 -->
+<ipojo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="org.apache.felix.ipojo"
+       xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.4.0/core.xsd">
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>apache-manager</artifactId>
-        <groupId>org.ow2.jonas.jpaas</groupId>
-        <version>1.1.1-SNAPSHOT</version>
-    </parent>
-    <modelVersion>4.0.0</modelVersion>
+    <instance component="ProxyManagerApplication"/>
 
-    <groupId>org.ow2.jonas.jpaas</groupId>
-    <artifactId>proxy-manager</artifactId>
-    <packaging>pom</packaging>
-    <name>JPaaS :: Apache Manager :: Proxy Manager</name>
-    <modules>
-        <module>api</module>
-        <module>osgi</module>
-        <module>rest</module>
-    </modules>
-
-
-</project>
+</ipojo>
