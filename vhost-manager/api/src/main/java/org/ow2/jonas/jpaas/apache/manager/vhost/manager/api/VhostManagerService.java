@@ -72,7 +72,7 @@ public interface VhostManagerService {
     void deleteVirtualHost(String address, String serverName) throws VhostManagerException;
 
     /**
-     * Delete a Name-based Virtual Host block directive
+     * Delete a Virtual Host block directive
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -120,7 +120,7 @@ public interface VhostManagerService {
     void deleteDocumentRoot(String address, String serverName) throws VhostManagerException;
 
     /**
-     * Create a DocumentRoot directive in a Name-based Virtual Host
+     * Create a DocumentRoot directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param documentRoot value of the DocumentRoot directive to create
@@ -129,7 +129,7 @@ public interface VhostManagerService {
     public void createDocumentRoot(long vhostID, String documentRoot) throws VhostManagerException;
 
     /**
-     * Delete a DocumentRoot directive in a Name-based Virtual Host
+     * Delete a DocumentRoot directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -177,7 +177,7 @@ public interface VhostManagerService {
     void deleteServerAlias(String address, String serverName) throws VhostManagerException;
 
     /**
-     * Create a ServerAlias directive in a Name-based Virtual Host
+     * Create a ServerAlias directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param serverAlias argument(s) of the ServerAlias directive to create
@@ -186,7 +186,7 @@ public interface VhostManagerService {
     public void createServerAlias(long vhostID, List<String> serverAlias) throws VhostManagerException;
 
     /**
-     * Delete a ServerAlias directive in a Name-based Virtual Host
+     * Delete a ServerAlias directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -232,7 +232,7 @@ public interface VhostManagerService {
     void deleteServerPath(String address, String serverName) throws VhostManagerException;
 
     /**
-     * Create a ServerPath directive in a Name-based Virtual Host
+     * Create a ServerPath directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param serverPath value of the ServerPath directive to create
@@ -241,7 +241,7 @@ public interface VhostManagerService {
     public void createServerPath(long vhostID, String serverPath) throws VhostManagerException;
 
     /**
-     * Delete a ServerPath directive in a Name-based Virtual Host
+     * Delete a ServerPath directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException

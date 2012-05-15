@@ -63,7 +63,7 @@ public interface ProxyManagerService {
             throws ProxyManagerException;
 
     /**
-     * Create a ProxyPass directive in a Name-based Virtual Host
+     * Create a ProxyPass directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param path value of the ProxyPass first argument (path)
@@ -105,7 +105,7 @@ public interface ProxyManagerService {
             throws ProxyManagerException;
 
     /**
-     * Delete a ProxyPass directive in a Name-based Virtual Host
+     * Delete a ProxyPass directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param path value of the ProxyPass first argument (path)

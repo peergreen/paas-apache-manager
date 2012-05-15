@@ -189,7 +189,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Delete a Name-based Virtual Host block directive
+     * Delete a Virtual Host block directive
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -256,7 +256,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Create a DocumentRoot directive in a Name-based Virtual Host
+     * Create a DocumentRoot directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param documentRoot value of the DocumentRoot directive to create
@@ -268,7 +268,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Delete a DocumentRoot directive in a Name-based Virtual Host
+     * Delete a DocumentRoot directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -337,7 +337,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Create a ServerAlias directive in a Name-based Virtual Host
+     * Create a ServerAlias directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param serverAlias argument(s) of the ServerAlias directive to create
@@ -353,7 +353,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Delete a ServerAlias directive in a Name-based Virtual Host
+     * Delete a ServerAlias directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
@@ -414,7 +414,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Create a ServerPath directive in a Name-based Virtual Host
+     * Create a ServerPath directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @param serverPath value of the ServerPath directive to create
@@ -426,7 +426,7 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Delete a ServerPath directive in a Name-based Virtual Host
+     * Delete a ServerPath directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
      * @throws VhostManagerException
