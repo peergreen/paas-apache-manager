@@ -79,6 +79,7 @@ public interface IVhostManager {
      */
     @DELETE
     @Path("/{id}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteVirtualHost(@PathParam("id") Long vhostID);
 
     /**
@@ -89,6 +90,7 @@ public interface IVhostManager {
      */
     @POST
     @Path("/{id}/documentroot/{value}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response createDocumentRoot(@PathParam("id") Long vhostID, @PathParam("value") String documentRoot);
 
     /**
@@ -98,6 +100,7 @@ public interface IVhostManager {
      */
     @DELETE
     @Path("/{id}/documentroot")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteDocumentRoot(@PathParam("id") Long vhostID);
 
     /**
@@ -108,6 +111,7 @@ public interface IVhostManager {
      */
     @POST
     @Path("/{id}/serveralias/{value}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response createServerAlias(@PathParam("id") Long vhostID, @PathParam("value") String serverAlias);
 
     /**
@@ -117,6 +121,7 @@ public interface IVhostManager {
      */
     @DELETE
     @Path("/{id}/serveralias")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteServerAlias(@PathParam("id") Long vhostID);
 
     /**
@@ -127,6 +132,7 @@ public interface IVhostManager {
      */
     @POST
     @Path("/{id}/serverpath/{value}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response createServerPath(@PathParam("id") Long vhostID, @PathParam("value") String serverPath);
 
     /**
@@ -136,6 +142,7 @@ public interface IVhostManager {
      */
     @DELETE
     @Path("/{id}/serverpath")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteServerPath(@PathParam("id") Long vhostID);
 
 }

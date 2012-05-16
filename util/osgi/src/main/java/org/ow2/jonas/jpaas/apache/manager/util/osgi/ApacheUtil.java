@@ -259,7 +259,7 @@ public class ApacheUtil implements ApacheUtilService {
         String vhostFileName = "vh-" + String.valueOf(vhostID) + ".conf";
         String vhostFilePath = vhostConfigurationFolder +  "/" + vhostFileName;
         if (!isVhostExist(vhostID)) {
-            throw new ApacheManagerException("The Virtual Host ID=" + String.valueOf(vhostID) + "does not exist");
+            throw new ApacheManagerException("The Virtual Host ID=" + String.valueOf(vhostID) + " does not exist");
         } else {
             return vhostFilePath;
         }

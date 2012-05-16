@@ -30,6 +30,7 @@ import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerService;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.rest.IVhostManager;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.Vhost;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.VhostList;
+import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -54,6 +55,11 @@ public class VhostManagerRest implements IVhostManager {
      */
     private VhostManagerService vhostManagerService;
 
+    /**
+     * End of Line
+     */
+    public static final String EOL = "\n";
+
     public VhostManagerRest(VhostManagerService vhostManagerService) {
         this.vhostManagerService = vhostManagerService;
     }
@@ -68,7 +74,12 @@ public class VhostManagerRest implements IVhostManager {
             list = vhostManagerService.getVhostList();
         } catch (VhostManagerException e) {
             logger.error("Cannot get the Virtual Host list", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot get the Virtual Host list." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response
                 .status(Response.Status.OK)
@@ -89,7 +100,12 @@ public class VhostManagerRest implements IVhostManager {
             vhost = new Vhost(vhostID, address, null);
         } catch (VhostManagerException e) {
             logger.error("Cannot create Virtual Host " + address, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create Virtual Host " + address + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED)
                 .entity(vhost)
@@ -110,7 +126,12 @@ public class VhostManagerRest implements IVhostManager {
             vhost = new Vhost(vhostID, address, servername);
         } catch (VhostManagerException e) {
             logger.error("Cannot create Virtual Host " + address + ", " + servername, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create Virtual Host " + address + ", " + servername + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED)
                 .entity(vhost)
@@ -128,7 +149,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.deleteVirtualHost(vhostID);
         } catch (VhostManagerException e) {
             logger.error("Cannot delete Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot delete Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -144,7 +170,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.createDocumentRoot(vhostID, documentRoot);
         } catch (VhostManagerException e) {
             logger.error("Cannot create DocumentRoot in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create DocumentRoot in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED).build();
     }
@@ -159,7 +190,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.deleteDocumentRoot(vhostID);
         } catch (VhostManagerException e) {
             logger.error("Cannot delete DocumentRoot in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot delete DocumentRoot in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -180,7 +216,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.createServerAlias(vhostID, aliasList);
         } catch (VhostManagerException e) {
             logger.error("Cannot create ServerAlias in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create ServerAlias in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED).build();
     }
@@ -195,7 +236,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.deleteServerAlias(vhostID);
         } catch (VhostManagerException e) {
             logger.error("Cannot delete ServerAlias in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot delete ServerAlias in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -211,7 +257,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.createServerPath(vhostID, serverPath);
         } catch (VhostManagerException e) {
             logger.error("Cannot create ServerPath in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create ServerPath in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED).build();
     }
@@ -226,7 +277,12 @@ public class VhostManagerRest implements IVhostManager {
             vhostManagerService.deleteServerPath(vhostID);
         } catch (VhostManagerException e) {
             logger.error("Cannot delete ServerPath in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot delete ServerPath in Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
