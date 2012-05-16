@@ -257,4 +257,12 @@ public interface VhostManagerService {
      */
     public VhostList getVhostList() throws VhostManagerException;
 
+    /**
+     * Return the content of a Virtual Host configuration file
+     * @param vhostID ID of the virtual host
+     * @return vhost file content
+     * @throws VhostManagerException
+     */
+    public String getVhostContent(long vhostID) throws VhostManagerException;
+
 }

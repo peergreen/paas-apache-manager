@@ -34,6 +34,7 @@ import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.LinkedList;
@@ -85,6 +86,28 @@ public class VhostManagerRest implements IVhostManager {
                 .status(Response.Status.OK)
                 .entity(list)
                 .type(MediaType.APPLICATION_XML_TYPE)
+                .build();
+    }
+
+    /**
+     * Get a Virtual Host content
+     */
+    public Response getVhost(Long vhostID) {
+        String vhost;
+        try {
+            vhost = vhostManagerService.getVhostContent(vhostID);
+        } catch (VhostManagerException e) {
+            logger.error("Cannot get the Virtual Host " + vhostID, e);
+            Error error = new Error();
+            error.setMessage("Cannot get the Virtual Host " + vhostID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response
+                .status(Response.Status.OK)
+                .entity(vhost)
                 .build();
     }
 

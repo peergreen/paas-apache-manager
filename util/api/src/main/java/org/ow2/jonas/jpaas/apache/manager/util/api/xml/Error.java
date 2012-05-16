@@ -26,7 +26,6 @@
 package org.ow2.jonas.jpaas.apache.manager.util.api.xml;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlValue;
 
 /**
  * Error XML element

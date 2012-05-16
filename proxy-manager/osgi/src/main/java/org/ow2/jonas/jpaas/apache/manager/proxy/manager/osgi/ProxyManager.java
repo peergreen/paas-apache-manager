@@ -39,10 +39,6 @@ import org.ow2.jonas.lib.bootstrap.JProp;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * The OSGi implementation of the ProxyManagerService Interface
  *

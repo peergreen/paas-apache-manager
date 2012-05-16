@@ -38,7 +38,6 @@ import org.ow2.util.log.LogFactory;
 import org.ow2.jonas.lib.bootstrap.JProp;
 
 import java.io.*;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -190,8 +189,7 @@ public class ApacheUtil implements ApacheUtilService {
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter pw = new PrintWriter(bw);
 
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-                String string = iterator.next();
+            for (String string : fileStringList) {
                 logger.debug("flush : " + string);
                 pw.println(string);
             }
@@ -227,13 +225,7 @@ public class ApacheUtil implements ApacheUtilService {
         String vhostFileName = "vh-" + String.valueOf(vhostID) + ".conf";
         String vhostFilePath = vhostConfigurationFolder +  "/" + vhostFileName;
         File file = new File(vhostFilePath);
-        boolean result;
-        if (file.exists()) {
-            result = true;
-        } else {
-            result = false;
-        }
-        return result;
+        return file.exists();
     }
 
     /**
@@ -302,8 +294,7 @@ public class ApacheUtil implements ApacheUtilService {
         String line = directive + " " + directiveArg;
         String vhostEnd = "</VirtualHost>";
         long directiveID = getAvailableDirectiveID(vhostFile);
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
+        for (String string : fileStringList) {
             if (string.contains(vhostEnd)) {
                 newFileStringList.add(getDirectiveBeginLine(directiveID));
                 newFileStringList.add(line);
@@ -350,8 +341,7 @@ public class ApacheUtil implements ApacheUtilService {
         String endLine = getDirectiveEndLine(directiveID);
         boolean found = false;
         boolean inDirective = false;
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
+        for (String string : fileStringList) {
             if (string.contains(startLine)) {
                 inDirective = true;
                 found = true;
@@ -474,8 +464,7 @@ public class ApacheUtil implements ApacheUtilService {
      * Get a list of Virtual Host files name.
      */
     public String[] getVhostFileNameList() {
-        String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
-        return fileList;
+        return new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
     }
 
 
@@ -499,7 +488,9 @@ public class ApacheUtil implements ApacheUtilService {
             throw new ApacheManagerException("Problem to read file " + file, e.getCause());
         } finally {
             try {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) { /* ignore it */
             }
         }
@@ -525,17 +516,16 @@ public class ApacheUtil implements ApacheUtilService {
         String startLine = getDirectiveBeginLine(directiveID);
         String endLine = getDirectiveEndLine(directiveID);
         boolean found = false;
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
+        for (String string : fileStringList) {
             if (string.contains(line)) {
                 found = true;
             }
             newFileStringList.add(string);
         }
         if (!found) {
-            newFileStringList.add(getDirectiveBeginLine(directiveID));
+            newFileStringList.add(startLine);
             newFileStringList.add(line);
-            newFileStringList.add(getDirectiveEndLine(directiveID));
+            newFileStringList.add(endLine);
         } else {
             throw new ApacheManagerException("Cannot add the " + directive + " directive : a directive \""
                     + line + "\" is already present");
@@ -561,8 +551,7 @@ public class ApacheUtil implements ApacheUtilService {
         String endLine = getDirectiveEndLine(directiveID);
         boolean found = false;
         boolean inDirective = false;
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
+        for (String string : fileStringList) {
             if (string.contains(startLine)) {
                 inDirective = true;
                 found = true;

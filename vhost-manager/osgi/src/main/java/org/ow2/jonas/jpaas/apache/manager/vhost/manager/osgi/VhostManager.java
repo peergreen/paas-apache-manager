@@ -37,10 +37,7 @@ import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerException;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerService;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,9 +102,8 @@ public class VhostManager implements VhostManagerService {
         List<String> newFileStringList = new LinkedList<String>();
         boolean found = false;
 
-        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-            String string = iterator.next();
-            if (string.contains("Include " + vhostConfigurationFolder  + "/*.conf")) {
+        for (String string : fileStringList) {
+            if (string.contains("Include " + vhostConfigurationFolder + "/*.conf")) {
                 found = true;
             }
             newFileStringList.add(string);
@@ -582,14 +578,17 @@ public class VhostManager implements VhostManagerService {
     }
 
     /**
-     * Return the path of a new vhost file with a correct ID
+     * Return the path of a vhost file
+     * @param vhostID ID of the virtual host
      * @return vhost file path
      */
-    private synchronized String getVhostFileFromID(long id) {
-        long newID = id;
-        String fileName = "vh-" + String.valueOf(newID) + ".conf";
-        String filePath = vhostConfigurationFolder + "/" +  fileName;
-        return filePath;
+    private String getVhostFileFromID(long vhostID) throws VhostManagerException {
+        if (apacheUtilService.isVhostExist(vhostID)) {
+        String fileName = "vh-" + String.valueOf(vhostID) + ".conf";
+        return vhostConfigurationFolder + "/" +  fileName;
+        } else {
+            throw new VhostManagerException("The Virtual Host ID=" + vhostID + " does not exist");
+        }
     }
 
     /**
@@ -636,6 +635,21 @@ public class VhostManager implements VhostManagerService {
         }
 
         return new VhostList(vhostList);
+    }
+
+    /**
+     * Return the content of a Virtual Host configuration file
+     * @param vhostID ID of the virtual host
+     * @return vhost file content
+     * @throws VhostManagerException
+     */
+    public String getVhostContent(long vhostID) throws VhostManagerException {
+        String vhostFile = getVhostFileFromID(vhostID);
+        try {
+            return apacheUtilService.fileToString(vhostFile);
+        } catch (ApacheManagerException e) {
+            throw new VhostManagerException(e.getMessage(), e.getCause());
+        }
     }
 
 

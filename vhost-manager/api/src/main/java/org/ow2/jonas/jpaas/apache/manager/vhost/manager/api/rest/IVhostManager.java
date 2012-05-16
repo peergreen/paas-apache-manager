@@ -52,6 +52,15 @@ public interface IVhostManager {
     public Response getVhostList();
 
     /**
+     * Get a Virtual Host content
+     *
+     */
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getVhost(@PathParam("id") Long vhostID);
+
+    /**
      * Create a Virtual Host block directive
      *
      * @param address address of the virtual host
