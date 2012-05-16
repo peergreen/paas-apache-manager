@@ -28,9 +28,11 @@ package org.ow2.jonas.jpaas.apache.manager.proxy.manager.rest;
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerException;
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerService;
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.rest.IProxyManager;
+import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Directive;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -61,13 +63,19 @@ public class ProxyManagerRest implements IProxyManager {
      * @param url  value of the ProxyPass second argument (url)
      */
     public Response createProxyPass(String path, String url) {
+        Directive directive;
         try {
-            proxyManagerService.createProxyPass(path, url);
+            long directiveID = proxyManagerService.createProxyPass(path, url);
+            String directiveValue = path + " " + url;
+            directive = new Directive(directiveID, "ProxyPass", directiveValue);
         } catch (ProxyManagerException e) {
             logger.error("Cannot create ProxyPass " + path + ", " + url, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.CREATED).build();
+        return Response.status(Response.Status.CREATED)
+                .entity(directive)
+                .type(MediaType.APPLICATION_XML_TYPE)
+                .build();
     }
 
     /**
@@ -78,26 +86,31 @@ public class ProxyManagerRest implements IProxyManager {
      * @param url     value of the ProxyPass second argument (url)
      */
     public Response createVhostProxyPass(Long vhostID, String path, String url) {
+        Directive directive;
         try {
-            proxyManagerService.createVhostProxyPass(vhostID, path, url);
+            long directiveID = proxyManagerService.createVhostProxyPass(vhostID, path, url);
+            String directiveValue = path + " " + url;
+            directive = new Directive(directiveID, "ProxyPass", directiveValue);
         } catch (ProxyManagerException e) {
             logger.error("Cannot create ProxyPass " + path + ", " + url + "in Virtual Host " + vhostID, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.CREATED).build();
+        return Response.status(Response.Status.CREATED)
+                .entity(directive)
+                .type(MediaType.APPLICATION_XML_TYPE)
+                .build();
     }
 
     /**
      * Delete a ProxyPass directive
      *
-     * @param path value of the ProxyPass first argument (path)
-     * @param url  value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      */
-    public Response deleteProxyPass(String path, String url) {
+    public Response deleteProxyPass(Long directiveID) {
         try {
-            proxyManagerService.deleteProxyPass(path, url);
+            proxyManagerService.deleteProxyPass(directiveID);
         } catch (ProxyManagerException e) {
-            logger.error("Cannot create ProxyPass " + path + ", " + url, e);
+            logger.error("Cannot delete ProxyPass " + directiveID, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
@@ -107,14 +120,13 @@ public class ProxyManagerRest implements IProxyManager {
      * Delete a ProxyPass directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
-     * @param path    value of the ProxyPass first argument (path)
-     * @param url     value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      */
-    public Response deleteVhostProxyPass(Long vhostID, String path, String url) {
+    public Response deleteVhostProxyPass(Long vhostID, Long directiveID) {
         try {
-            proxyManagerService.deleteVhostProxyPass(vhostID, path, url);
+            proxyManagerService.deleteVhostProxyPass(vhostID, directiveID);
         } catch (ProxyManagerException e) {
-            logger.error("Cannot delete ProxyPass " + path + ", " + url + "in Virtual Host " + vhostID, e);
+            logger.error("Cannot delete ProxyPass " + directiveID + "in Virtual Host " + vhostID, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();

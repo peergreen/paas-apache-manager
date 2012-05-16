@@ -604,7 +604,12 @@ public class VhostManager implements VhostManagerService {
         Pattern serverNamePattern = Pattern.compile("ServerName (.*?)\n");
         List<Vhost> vhostList = new LinkedList<Vhost>();
         for (String fileName : fileList) {
-            String content = fileToString(vhostConfigurationFolder + "/" +  fileName);
+            String content = null;
+            try {
+                content = apacheUtilService.fileToString(vhostConfigurationFolder + "/" + fileName);
+            } catch (ApacheManagerException e) {
+                throw new VhostManagerException(e.getMessage(), e.getCause());
+            }
             Matcher matcher;
             Long vhostID;
             String address;
@@ -634,24 +639,5 @@ public class VhostManager implements VhostManagerService {
     }
 
 
-    public static String fileToString(String file) throws VhostManagerException {
-        String result = null;
-        DataInputStream in = null;
 
-        try {
-            File f = new File(file);
-            byte[] buffer = new byte[(int) f.length()];
-            in = new DataInputStream(new FileInputStream(f));
-            in.readFully(buffer);
-            result = new String(buffer);
-        } catch (IOException e) {
-            throw new VhostManagerException("Problem to read file " + file, e.getCause());
-        } finally {
-            try {
-                in.close();
-            } catch (IOException e) { /* ignore it */
-            }
-        }
-        return result;
-    }
 }

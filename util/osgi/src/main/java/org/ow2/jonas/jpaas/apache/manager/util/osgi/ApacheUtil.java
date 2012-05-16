@@ -37,14 +37,7 @@ import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 import org.ow2.jonas.lib.bootstrap.JProp;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -95,6 +88,11 @@ public class ApacheUtil implements ApacheUtilService {
      * Virtual Host file name template
      */
     private static final String VHOST_FILE_TEMPLATE = "vh-(\\d*)\\.conf";
+
+    /**
+     * Directive ID template
+     */
+    private static final String DIRECTIVE_ID_TEMPLATE = "#id=(\\d*)";
 
 
     @Validate
@@ -209,6 +207,7 @@ public class ApacheUtil implements ApacheUtilService {
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return true if the Virtual Host exists
+     * @throws ApacheManagerException
      */
     public boolean isVhostExist(String vhAddress, String vhServerName) throws ApacheManagerException {
         try {
@@ -242,6 +241,7 @@ public class ApacheUtil implements ApacheUtilService {
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return path of the Virtual Host configuration file
+     * @throws ApacheManagerException
      */
     public String getVhostConfigurationFile(String vhAddress, String vhServerName) throws ApacheManagerException {
         long vhostID = getVhostID(vhAddress, vhServerName);
@@ -252,6 +252,7 @@ public class ApacheUtil implements ApacheUtilService {
      * Return the path of a Virtual Host configuration file
      * @param vhostID ID of the virtual host
      * @return path of the Virtual Host configuration file
+     * @throws ApacheManagerException
      */
     public String getVhostConfigurationFile(long vhostID) throws ApacheManagerException {
         logger.debug("getVhostConfigurationFile (" + String.valueOf(vhostID) + ")");
@@ -272,14 +273,16 @@ public class ApacheUtil implements ApacheUtilService {
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
+     * @return the directive ID
+     * @throws ApacheManagerException
      */
-    public void addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg)
+    public long addDirectiveInVhost(String vhAddress, String vhServerName, String directive, String directiveArg)
             throws ApacheManagerException {
         logger.debug("addDirectiveInVhost (" + vhAddress + "," + vhServerName + "," + directive + "," + directiveArg
                 + ")");
 
         long vhostID = getVhostID(vhAddress, vhServerName);
-        addDirectiveInVhost(vhostID, directive, directiveArg);
+        return addDirectiveInVhost(vhostID, directive, directiveArg);
     }
 
     /**
@@ -287,8 +290,10 @@ public class ApacheUtil implements ApacheUtilService {
      * @param vhostID ID of the virtual host
      * @param directive the directive to add
      * @param directiveArg argument(s) of the directive
+     * @return the directive ID
+     * @throws ApacheManagerException
      */
-    public void addDirectiveInVhost(long vhostID, String directive, String directiveArg) throws ApacheManagerException {
+    public long addDirectiveInVhost(long vhostID, String directive, String directiveArg) throws ApacheManagerException {
         logger.debug("addDirectiveInVhost (" + vhostID + "," + directive + "," + directiveArg + ")");
 
         String vhostFile = getVhostConfigurationFile(vhostID);
@@ -296,60 +301,71 @@ public class ApacheUtil implements ApacheUtilService {
         List<String> newFileStringList = new LinkedList<String>();
         String line = directive + " " + directiveArg;
         String vhostEnd = "</VirtualHost>";
-
+        long directiveID = getAvailableDirectiveID(vhostFile);
         for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
             String string = iterator.next();
             if (string.contains(vhostEnd)) {
+                newFileStringList.add(getDirectiveBeginLine(directiveID));
                 newFileStringList.add(line);
+                newFileStringList.add(getDirectiveEndLine(directiveID));
             }
             newFileStringList.add(string);
 
         }
-
         flushConfigurationFile(vhostFile, newFileStringList);
+        return directiveID;
     }
 
     /**
      *  Remove a directive of a Virtual Host block.  if the specified directive is present
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
-     * @param directive the directive to remove
+     * @param directiveID the ID of the directive to remove
+     * @throws ApacheManagerException
      */
-    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhServerName, String directive, String directiveArg)
+    public void removeDirectiveInVhostIfPossible(String vhAddress, String vhServerName, long directiveID)
             throws ApacheManagerException {
-        logger.debug("removeDirectiveInVhostIfPossible (" + vhAddress + "," + vhServerName + "," + directive + ","
-                + directiveArg + ")");
+        logger.debug("removeDirectiveInVhostIfPossible (" + vhAddress + "," + vhServerName + "," + directiveID + ")");
 
         long vhostID = getVhostID(vhAddress, vhServerName);
-        removeDirectiveInVhostIfPossible(vhostID, directive, directiveArg);
+        removeDirectiveInVhostIfPossible(vhostID, directiveID);
     }
+
 
     /**
      *  Remove a directive of a Virtual Host block.  if the specified directive is present
      * @param vhostID ID of the virtual host
-     * @param directive the directive to remove
+     * @param directiveID the ID of the directive to remove
+     * @throws ApacheManagerException
      */
-    public void removeDirectiveInVhostIfPossible(long vhostID, String directive, String directiveArg)
+    public void removeDirectiveInVhostIfPossible(long vhostID, long directiveID)
             throws ApacheManagerException {
-        logger.debug("removeDirectiveInVhostIfPossible (" + vhostID + "," + directive + "," + directiveArg + ")");
+        logger.debug("removeDirectiveInVhostIfPossible (" + vhostID + "," + directiveID + ")");
 
         String vhostFile = getVhostConfigurationFile(vhostID);
         List<String> fileStringList = loadConfigurationFile(vhostFile);
         List<String> newFileStringList = new LinkedList<String>();
 
-        String line = directive + " " + directiveArg;
+        String startLine = getDirectiveBeginLine(directiveID);
+        String endLine = getDirectiveEndLine(directiveID);
         boolean found = false;
+        boolean inDirective = false;
         for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
             String string = iterator.next();
-            if (string.contains(line)) {
+            if (string.contains(startLine)) {
+                inDirective = true;
                 found = true;
-            } else {
+            }
+            if (!inDirective) {
                 newFileStringList.add(string);
+            }
+            if (string.contains(endLine)) {
+                inDirective = false;
             }
         }
         if (!found) {
-            throw new ApacheManagerException("Cannot remove the directive : there is no directive \"" + directive
-                    + " " + directiveArg + "\" in the Virtual Host configuration file (" + vhostFile + ").");
+            throw new ApacheManagerException("Cannot remove the directive : there is no directive \"" + directiveID
+                    + "\" in the Virtual Host configuration file (" + vhostFile + ").");
         }
 
         flushConfigurationFile(vhostFile, newFileStringList);
@@ -365,8 +381,8 @@ public class ApacheUtil implements ApacheUtilService {
 
     /**
      * Get a Virtual Host ID from its address and ServerName
-     * @param vhAddress
-     * @param vhServerName
+     * @param vhAddress address of the virtual host
+     * @param vhServerName value of the ServerName directive (null for a virtual host without ServerName directive)
      * @return the Virtual host ID
      * @throws ApacheManagerException
      */
@@ -408,11 +424,162 @@ public class ApacheUtil implements ApacheUtilService {
     }
 
     /**
+     * Get an ID which can be used for a new Directive for a specific file
+     * @param file path of the file
+     * @return an ID
+     * @throws ApacheManagerException
+     */
+    private synchronized long getAvailableDirectiveID(String file) throws ApacheManagerException {
+        try {
+            long maxID = 0;
+            String content = fileToString(file);
+            Pattern pattern = Pattern.compile(DIRECTIVE_ID_TEMPLATE);
+            Matcher matcher = pattern.matcher(content);
+            long currentID;
+            while (matcher.find()) {
+                currentID = Long.parseLong(matcher.group(1));
+                if (currentID > maxID) {
+                    maxID = currentID;
+                }
+            }
+            return maxID + 1;
+        } catch (IllegalStateException e) {
+            //if no match found
+            return 1L;
+        } catch (ApacheManagerException e) {
+            throw new ApacheManagerException("Cannot get an available ID", e.getCause());
+        }
+    }
+
+    /**
+     *
+     * @param id The ID of the directive
+     * @return the ID line before a directive
+     */
+    private String getDirectiveBeginLine(long id) {
+        return "#id=" + String.valueOf(id);
+    }
+
+    /**
+     *
+     * @param id The ID of the directive
+     * @return the ID line after a directive
+     */
+    private String getDirectiveEndLine(long id) {
+        return "#/id=" + String.valueOf(id);
+    }
+
+
+    /**
      * Get a list of Virtual Host files name.
      */
     public String[] getVhostFileNameList() {
         String[] fileList = new File(vhostConfigurationFolder).list(new VhostFilter(VHOST_FILE_TEMPLATE));
         return fileList;
+    }
+
+
+    /**
+     * Get the content of a file in a String
+     * @param file path to the file to read
+     * @return A String representation of the file
+     * @throws ApacheManagerException
+     */
+    public String fileToString(String file) throws ApacheManagerException {
+        String result = null;
+        DataInputStream in = null;
+
+        try {
+            File f = new File(file);
+            byte[] buffer = new byte[(int) f.length()];
+            in = new DataInputStream(new FileInputStream(f));
+            in.readFully(buffer);
+            result = new String(buffer);
+        } catch (IOException e) {
+            throw new ApacheManagerException("Problem to read file " + file, e.getCause());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException e) { /* ignore it */
+            }
+        }
+        return result;
+    }
+
+    /**
+     *  Add a directive in a specific configuration file.
+     * @param file path of the file
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     * @return the directive ID
+     * @throws ApacheManagerException
+     */
+    public long addDirectiveInFile(String file, String directive, String directiveArg) throws ApacheManagerException {
+        logger.debug("addDirectiveInFile (" + file + "," + directive + "," + directiveArg + ")");
+
+
+        List<String> fileStringList = loadConfigurationFile(file);
+        List<String> newFileStringList = new LinkedList<String>();
+        String line = directive + " " + directiveArg;
+        long directiveID = getAvailableDirectiveID(file);
+        String startLine = getDirectiveBeginLine(directiveID);
+        String endLine = getDirectiveEndLine(directiveID);
+        boolean found = false;
+        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.contains(line)) {
+                found = true;
+            }
+            newFileStringList.add(string);
+        }
+        if (!found) {
+            newFileStringList.add(getDirectiveBeginLine(directiveID));
+            newFileStringList.add(line);
+            newFileStringList.add(getDirectiveEndLine(directiveID));
+        } else {
+            throw new ApacheManagerException("Cannot add the " + directive + " directive : a directive \""
+                    + line + "\" is already present");
+        }
+        flushConfigurationFile(file, newFileStringList);
+        return directiveID;
+    }
+
+    /**
+     *  Remove a directive in a specific configuration file.  if the specified directive is present
+     * @param file path of the file
+     * @param directiveID the ID of the directive to remove
+     * @throws ApacheManagerException
+     */
+    public void removeDirectiveInFile(String file, long directiveID) throws ApacheManagerException {
+        logger.debug("removeDirectiveInFile (" + file + "," + directiveID + ")");
+
+
+        List<String> fileStringList = loadConfigurationFile(file);
+        List<String> newFileStringList = new LinkedList<String>();
+
+        String startLine = getDirectiveBeginLine(directiveID);
+        String endLine = getDirectiveEndLine(directiveID);
+        boolean found = false;
+        boolean inDirective = false;
+        for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            if (string.contains(startLine)) {
+                inDirective = true;
+                found = true;
+            }
+            if (!inDirective) {
+                newFileStringList.add(string);
+            }
+            if (string.contains(endLine)) {
+                inDirective = false;
+            }
+        }
+        if (!found) {
+            throw new ApacheManagerException("Cannot remove the directive : there is no directive \"" + directiveID
+                    + "\" in the configuration file (" + file + ").");
+        }
+
+        flushConfigurationFile(file, newFileStringList);
     }
 
 }

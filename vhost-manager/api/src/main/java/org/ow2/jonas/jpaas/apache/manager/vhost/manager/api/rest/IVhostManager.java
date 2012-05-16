@@ -58,6 +58,7 @@ public interface IVhostManager {
      */
     @POST
     @Path("/address/{address}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response createVirtualHost(@PathParam("address") String address);
 
     /**
@@ -68,6 +69,7 @@ public interface IVhostManager {
      */
     @POST
     @Path("/address/{address}/servername/{servername}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response createVirtualHost(@PathParam("address") String address, @PathParam("servername") String servername);
 
     /**

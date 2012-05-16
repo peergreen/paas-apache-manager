@@ -28,6 +28,7 @@ package org.ow2.jonas.jpaas.apache.manager.vhost.manager.rest;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerException;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.VhostManagerService;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.rest.IVhostManager;
+import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.Vhost;
 import org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.xml.VhostList;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -82,13 +83,18 @@ public class VhostManagerRest implements IVhostManager {
      * @param address address of the virtual host
      */
     public Response createVirtualHost(String address) {
+        Vhost vhost;
         try {
-            vhostManagerService.createVirtualHost(address);
+            long vhostID = vhostManagerService.createVirtualHost(address);
+            vhost = new Vhost(vhostID, address, null);
         } catch (VhostManagerException e) {
             logger.error("Cannot create Virtual Host " + address, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.CREATED).build();
+        return Response.status(Response.Status.CREATED)
+                .entity(vhost)
+                .type(MediaType.APPLICATION_XML_TYPE)
+                .build();
     }
 
     /**
@@ -98,13 +104,18 @@ public class VhostManagerRest implements IVhostManager {
      * @param servername value of the ServerName directive
      */
     public Response createVirtualHost(String address, String servername) {
+        Vhost vhost;
         try {
-            vhostManagerService.createVirtualHost(address, servername);
+            long vhostID = vhostManagerService.createVirtualHost(address, servername);
+            vhost = new Vhost(vhostID, address, servername);
         } catch (VhostManagerException e) {
             logger.error("Cannot create Virtual Host " + address + ", " + servername, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-        return Response.status(Response.Status.CREATED).build();
+        return Response.status(Response.Status.CREATED)
+                .entity(vhost)
+                .type(MediaType.APPLICATION_XML_TYPE)
+                .build();
     }
 
     /**

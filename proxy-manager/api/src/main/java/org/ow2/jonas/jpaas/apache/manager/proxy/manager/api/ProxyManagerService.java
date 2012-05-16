@@ -38,7 +38,7 @@ public interface ProxyManagerService {
      * @param url  value of the ProxyPass second argument (url)
      * @throws ProxyManagerException
      */
-    public void createProxyPass(String path, String url) throws ProxyManagerException;
+    public long createProxyPass(String path, String url) throws ProxyManagerException;
 
     /**
      * Create a ProxyPass directive in a Virtual Host
@@ -46,9 +46,10 @@ public interface ProxyManagerService {
      * @param vhAddress address of the virtual host
      * @param path value of the ProxyPass first argument (path)
      * @param url  value of the ProxyPass second argument (url)
+     * @return the directive ID
      * @throws ProxyManagerException
      */
-    public void createVhostProxyPass(String vhAddress, String path, String url) throws ProxyManagerException;
+    public long createVhostProxyPass(String vhAddress, String path, String url) throws ProxyManagerException;
 
     /**
      * Create a ProxyPass directive in a Name-based Virtual Host
@@ -57,9 +58,10 @@ public interface ProxyManagerService {
      * @param vhServerName value of the ServerName directive
      * @param path value of the ProxyPass first argument (path)
      * @param url  value of the ProxyPass second argument (url)
+     * @return the directive ID
      * @throws ProxyManagerException
      */
-    public void createVhostProxyPass(String vhAddress, String vhServerName, String path, String url)
+    public long createVhostProxyPass(String vhAddress, String vhServerName, String path, String url)
             throws ProxyManagerException;
 
     /**
@@ -68,51 +70,48 @@ public interface ProxyManagerService {
      * @param vhostID ID of the virtual host
      * @param path value of the ProxyPass first argument (path)
      * @param url  value of the ProxyPass second argument (url)
+     * @return the directive ID
      * @throws ProxyManagerException
      */
-    public void createVhostProxyPass(long vhostID, String path, String url) throws ProxyManagerException;
+    public long createVhostProxyPass(long vhostID, String path, String url) throws ProxyManagerException;
 
 
     /**
      * Delete a ProxyPass directive
      *
-     * @param path value of the ProxyPass first argument (path)
-     * @param url  value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      * @throws ProxyManagerException
      */
-    public void deleteProxyPass(String path, String url) throws ProxyManagerException;
+    public void deleteProxyPass(long directiveID) throws ProxyManagerException;
 
     /**
      * Delete a ProxyPass directive in a Virtual Host
      *
      * @param vhAddress address of the virtual host
-     * @param path value of the ProxyPass first argument (path)
-     * @param url  value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      * @throws ProxyManagerException
      */
-    public void deleteVhostProxyPass(String vhAddress, String path, String url) throws ProxyManagerException;
+    public void deleteVhostProxyPass(String vhAddress, long directiveID) throws ProxyManagerException;
 
     /**
      * Delete a ProxyPass directive in a Name-based Virtual Host
      *
      * @param vhAddress address of the virtual host
      * @param vhServerName value of the ServerName directive
-     * @param path value of the ProxyPass first argument (path)
-     * @param url  value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      * @throws ProxyManagerException
      */
-    public void deleteVhostProxyPass(String vhAddress, String vhServerName, String path, String url)
+    public void deleteVhostProxyPass(String vhAddress, String vhServerName, long directiveID)
             throws ProxyManagerException;
 
     /**
      * Delete a ProxyPass directive in a Virtual Host
      *
      * @param vhostID ID of the virtual host
-     * @param path value of the ProxyPass first argument (path)
-     * @param url  value of the ProxyPass second argument (url)
+     * @param directiveID the ID of the directive to remove
      * @throws ProxyManagerException
      */
-    public void deleteVhostProxyPass(long vhostID, String path, String url) throws ProxyManagerException;
+    public void deleteVhostProxyPass(long vhostID, long directiveID) throws ProxyManagerException;
 
 
 
