@@ -26,11 +26,13 @@
 package org.ow2.jonas.jpaas.apache.manager.vhost.manager.api.rest;
 
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -47,7 +49,7 @@ public interface IVhostManager {
      *
      */
     @GET
-    @Path("/list")
+    @Path("/vhost/list")
     @Produces(MediaType.APPLICATION_XML)
     public Response getVhostList();
 
@@ -56,7 +58,7 @@ public interface IVhostManager {
      *
      */
     @GET
-    @Path("/{id}")
+    @Path("/vhost/{id}")
     @Produces(MediaType.APPLICATION_XML)
     public Response getVhost(@PathParam("id") Long vhostID);
 
@@ -64,22 +66,12 @@ public interface IVhostManager {
      * Create a Virtual Host block directive
      *
      * @param address address of the virtual host
-     */
-    @POST
-    @Path("/address/{address}")
-    @Produces(MediaType.APPLICATION_XML)
-    public Response createVirtualHost(@PathParam("address") String address);
-
-    /**
-     * Create a Name-based Virtual Host block directive
-     *
-     * @param address address of the virtual host
      * @param servername value of the ServerName directive
      */
     @POST
-    @Path("/address/{address}/servername/{servername}")
+    @Path("/vhost")
     @Produces(MediaType.APPLICATION_XML)
-    public Response createVirtualHost(@PathParam("address") String address, @PathParam("servername") String servername);
+    public Response createVirtualHost(@QueryParam("address") String address, @DefaultValue("") @QueryParam("servername") String servername);
 
     /**
      * Delete a Virtual Host block directive
@@ -87,7 +79,7 @@ public interface IVhostManager {
      * @param vhostID ID of the virtual host
      */
     @DELETE
-    @Path("/{id}")
+    @Path("/vhost/{id}")
     @Produces(MediaType.APPLICATION_XML)
     public Response deleteVirtualHost(@PathParam("id") Long vhostID);
 
@@ -98,9 +90,9 @@ public interface IVhostManager {
      * @param documentRoot value of the DocumentRoot directive to create
      */
     @POST
-    @Path("/{id}/documentroot/{value}")
+    @Path("/vhost/{id}/documentroot")
     @Produces(MediaType.APPLICATION_XML)
-    public Response createDocumentRoot(@PathParam("id") Long vhostID, @PathParam("value") String documentRoot);
+    public Response createDocumentRoot(@PathParam("id") Long vhostID, @QueryParam("value") String documentRoot);
 
     /**
      * Delete a DocumentRoot directive in a Virtual Host
@@ -108,7 +100,7 @@ public interface IVhostManager {
      * @param vhostID ID of the virtual host
      */
     @DELETE
-    @Path("/{id}/documentroot")
+    @Path("/vhost/{id}/documentroot")
     @Produces(MediaType.APPLICATION_XML)
     public Response deleteDocumentRoot(@PathParam("id") Long vhostID);
 
@@ -119,9 +111,9 @@ public interface IVhostManager {
      * @param serverAlias argument(s) of the ServerAlias directive to create
      */
     @POST
-    @Path("/{id}/serveralias/{value}")
+    @Path("/vhost/{id}/serveralias")
     @Produces(MediaType.APPLICATION_XML)
-    public Response createServerAlias(@PathParam("id") Long vhostID, @PathParam("value") String serverAlias);
+    public Response createServerAlias(@PathParam("id") Long vhostID, @QueryParam("value") String serverAlias);
 
     /**
      * Delete a ServerAlias directive in a Virtual Host
@@ -129,7 +121,7 @@ public interface IVhostManager {
      * @param vhostID ID of the virtual host
      */
     @DELETE
-    @Path("/{id}/serveralias")
+    @Path("/vhost/{id}/serveralias")
     @Produces(MediaType.APPLICATION_XML)
     public Response deleteServerAlias(@PathParam("id") Long vhostID);
 
@@ -140,9 +132,9 @@ public interface IVhostManager {
      * @param serverPath value of the ServerPath directive to create
      */
     @POST
-    @Path("/{id}/serverpath/{value}")
+    @Path("/vhost/{id}/serverpath")
     @Produces(MediaType.APPLICATION_XML)
-    public Response createServerPath(@PathParam("id") Long vhostID, @PathParam("value") String serverPath);
+    public Response createServerPath(@PathParam("id") Long vhostID, @QueryParam("value") String serverPath);
 
     /**
      * Delete a ServerPath directive in a Virtual Host
@@ -150,7 +142,7 @@ public interface IVhostManager {
      * @param vhostID ID of the virtual host
      */
     @DELETE
-    @Path("/{id}/serverpath")
+    @Path("/vhost/{id}/serverpath")
     @Produces(MediaType.APPLICATION_XML)
     public Response deleteServerPath(@PathParam("id") Long vhostID);
 

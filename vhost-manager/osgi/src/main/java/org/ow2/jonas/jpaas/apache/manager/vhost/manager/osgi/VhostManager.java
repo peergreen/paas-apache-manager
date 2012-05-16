@@ -583,12 +583,8 @@ public class VhostManager implements VhostManagerService {
      * @return vhost file path
      */
     private String getVhostFileFromID(long vhostID) throws VhostManagerException {
-        if (apacheUtilService.isVhostExist(vhostID)) {
-        String fileName = "vh-" + String.valueOf(vhostID) + ".conf";
-        return vhostConfigurationFolder + "/" +  fileName;
-        } else {
-            throw new VhostManagerException("The Virtual Host ID=" + vhostID + " does not exist");
-        }
+            String fileName = "vh-" + String.valueOf(vhostID) + ".conf";
+            return vhostConfigurationFolder + "/" +  fileName;
     }
 
     /**
@@ -644,14 +640,16 @@ public class VhostManager implements VhostManagerService {
      * @throws VhostManagerException
      */
     public String getVhostContent(long vhostID) throws VhostManagerException {
-        String vhostFile = getVhostFileFromID(vhostID);
         try {
-            return apacheUtilService.fileToString(vhostFile);
+            if (apacheUtilService.isVhostExist(vhostID)) {
+                String vhostFile = getVhostFileFromID(vhostID);
+                return apacheUtilService.fileToString(vhostFile);
+            } else {
+                throw new VhostManagerException("The Virtual Host ID=" + vhostID + " does not exist");
+            }
         } catch (ApacheManagerException e) {
             throw new VhostManagerException(e.getMessage(), e.getCause());
         }
     }
-
-
 
 }

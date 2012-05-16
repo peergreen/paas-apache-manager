@@ -111,46 +111,26 @@ public class VhostManagerRest implements IVhostManager {
                 .build();
     }
 
-    /**
-     * Create a Virtual Host block directive
-     *
-     * @param address address of the virtual host
-     */
-    public Response createVirtualHost(String address) {
-        Vhost vhost;
-        try {
-            long vhostID = vhostManagerService.createVirtualHost(address);
-            vhost = new Vhost(vhostID, address, null);
-        } catch (VhostManagerException e) {
-            logger.error("Cannot create Virtual Host " + address, e);
-            Error error = new Error();
-            error.setMessage("Cannot create Virtual Host " + address + "." + EOL + e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(error)
-                    .type(MediaType.APPLICATION_XML_TYPE)
-                    .build();
-        }
-        return Response.status(Response.Status.CREATED)
-                .entity(vhost)
-                .type(MediaType.APPLICATION_XML_TYPE)
-                .build();
-    }
 
     /**
-     * Create a Name-based Virtual Host block directive
+     * Create a Virtual Host block directive
      *
      * @param address    address of the virtual host
      * @param servername value of the ServerName directive
      */
     public Response createVirtualHost(String address, String servername) {
         Vhost vhost;
+        if (servername.equals("")) {
+            servername = null;
+        }
         try {
             long vhostID = vhostManagerService.createVirtualHost(address, servername);
             vhost = new Vhost(vhostID, address, servername);
         } catch (VhostManagerException e) {
-            logger.error("Cannot create Virtual Host " + address + ", " + servername, e);
+            logger.error("Cannot create Virtual Host (Address=" + address + ", ServerName= " + servername +")", e);
             Error error = new Error();
-            error.setMessage("Cannot create Virtual Host " + address + ", " + servername + "." + EOL + e);
+            error.setMessage("Cannot create Virtual Host (Address=" + address + ", ServerName= " + servername +")."
+                    + EOL + e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
