@@ -29,6 +29,7 @@ import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerExceptio
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerService;
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.rest.IProxyManager;
 import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Directive;
+import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -51,6 +52,12 @@ public class ProxyManagerRest implements IProxyManager {
      */
     private ProxyManagerService proxyManagerService;
 
+    /**
+     * End of Line
+     */
+    public static final String EOL = "\n";
+
+
     public ProxyManagerRest(ProxyManagerService proxyManagerService) {
         this.proxyManagerService = proxyManagerService;
     }
@@ -70,7 +77,12 @@ public class ProxyManagerRest implements IProxyManager {
             directive = new Directive(directiveID, "ProxyPass", directiveValue);
         } catch (ProxyManagerException e) {
             logger.error("Cannot create ProxyPass " + path + ", " + url, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot create ProxyPass " + path + ", " + url + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED)
                 .entity(directive)
@@ -92,8 +104,14 @@ public class ProxyManagerRest implements IProxyManager {
             String directiveValue = path + " " + url;
             directive = new Directive(directiveID, "ProxyPass", directiveValue);
         } catch (ProxyManagerException e) {
-            logger.error("Cannot create ProxyPass " + path + ", " + url + "in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            logger.error("Cannot create ProxyPass " + path + ", " + url + " in Virtual Host " + vhostID, e);
+            Error error = new Error();
+            error.setMessage("Cannot create ProxyPass " + path + ", " + url + " in Virtual Host " + vhostID
+                    + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.CREATED)
                 .entity(directive)
@@ -111,7 +129,12 @@ public class ProxyManagerRest implements IProxyManager {
             proxyManagerService.deleteProxyPass(directiveID);
         } catch (ProxyManagerException e) {
             logger.error("Cannot delete ProxyPass " + directiveID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            Error error = new Error();
+            error.setMessage("Cannot delete ProxyPass " + directiveID + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -126,8 +149,14 @@ public class ProxyManagerRest implements IProxyManager {
         try {
             proxyManagerService.deleteVhostProxyPass(vhostID, directiveID);
         } catch (ProxyManagerException e) {
-            logger.error("Cannot delete ProxyPass " + directiveID + "in Virtual Host " + vhostID, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            logger.error("Cannot delete ProxyPass " + directiveID + " in Virtual Host " + vhostID, e);
+            Error error = new Error();
+            error.setMessage("Cannot delete ProxyPass " + directiveID + " in Virtual Host " + vhostID
+                    + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
         }
         return Response.status(Response.Status.NO_CONTENT).build();
     }

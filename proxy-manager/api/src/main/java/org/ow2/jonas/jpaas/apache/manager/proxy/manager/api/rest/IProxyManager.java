@@ -72,6 +72,7 @@ public interface IProxyManager {
      */
     @DELETE
     @Path("/proxypass/{directiveID}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteProxyPass(@PathParam("directiveID") Long directiveID);
 
     /**
@@ -81,6 +82,7 @@ public interface IProxyManager {
      */
     @DELETE
     @Path("/vhost/{vhostID}/proxypass/{directiveID}")
+    @Produces(MediaType.APPLICATION_XML)
     public Response deleteVhostProxyPass(@PathParam("vhostID") Long vhostID,
                                          @PathParam("directiveID") Long directiveID);
 
