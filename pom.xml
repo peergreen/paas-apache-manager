@@ -36,7 +36,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>org.ow2.jonas.jpaas</groupId>
+    <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
     <artifactId>apache-manager</artifactId>
     <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -69,9 +69,9 @@
     </properties>
 
     <modules>
+        <module>util</module>
         <module>vhost-manager</module>
         <module>proxy-manager</module>
-        <module>util</module>
     </modules>
 
 </project>

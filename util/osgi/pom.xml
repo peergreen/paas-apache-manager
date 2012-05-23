@@ -28,13 +28,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>apache-manager-util</artifactId>
-        <groupId>org.ow2.jonas.jpaas</groupId>
+        <artifactId>util</artifactId>
+        <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
         <version>1.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.ow2.jonas.jpaas</groupId>
-    <artifactId>apache-manager-util-osgi</artifactId>
+    <artifactId>util-osgi</artifactId>
     <packaging>bundle</packaging>
     <name>JPaaS :: Apache Manager :: Util :: OSGi</name>
 
@@ -61,8 +60,8 @@
             <version>${ipojo.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ow2.jonas.jpaas</groupId>
-            <artifactId>apache-manager-util-api</artifactId>
+            <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
+            <artifactId>util-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

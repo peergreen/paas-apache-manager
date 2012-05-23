@@ -29,18 +29,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>vhost-manager</artifactId>
-        <groupId>org.ow2.jonas.jpaas</groupId>
+        <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
         <version>1.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.ow2.jonas.jpaas</groupId>
+
     <artifactId>vhost-manager-osgi</artifactId>
     <packaging>bundle</packaging>
     <name>JPaaS :: Apache Manager :: Vhost Manager :: OSGi</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.ow2.jonas.jpaas</groupId>
+            <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
             <artifactId>vhost-manager-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -66,8 +66,8 @@
             <version>${ipojo.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ow2.jonas.jpaas</groupId>
-            <artifactId>apache-manager-util-api</artifactId>
+            <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
+            <artifactId>util-api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

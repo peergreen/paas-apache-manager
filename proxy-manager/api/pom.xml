@@ -29,12 +29,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>proxy-manager</artifactId>
-        <groupId>org.ow2.jonas.jpaas</groupId>
+        <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
         <version>1.1.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.ow2.jonas.jpaas</groupId>
     <artifactId>proxy-manager-api</artifactId>
     <packaging>bundle</packaging>
     <name>JPaaS :: Apache Manager :: Proxy Manager :: API</name>
