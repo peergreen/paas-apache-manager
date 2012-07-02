@@ -85,6 +85,7 @@
         <module>proxy-manager</module>
         <module>rewrite-manager</module>
         <module>jk-manager</module>
+        <module>ajpbalancer-manager</module>
     </modules>
 
 </project>
