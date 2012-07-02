@@ -83,6 +83,7 @@
         <module>util</module>
         <module>vhost-manager</module>
         <module>proxy-manager</module>
+        <module>rewrite-manager</module>
     </modules>
 
 </project>
