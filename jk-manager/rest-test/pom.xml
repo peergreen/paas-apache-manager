@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - JASMINe
+  - Copyright (C) 2011 Bull S.A.S.
+  - Contact: jasmine@ow2.org
+  -
+  - This library is free software; you can redistribute it and/or
+  - modify it under the terms of the GNU Lesser General Public
+  - License as published by the Free Software Foundation; either
+  - version 2.1 of the License, or any later version.
+  -
+  - This library is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  - Lesser General Public License for more details.
+  -
+  - You should have received a copy of the GNU Lesser General Public
+  - License along with this library; if not, write to the Free Software
+  - Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+  - USA
+  -
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  - $Id: pom.xml 8742 2011-08-11 15:01:30Z gonzalem $
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>agent</artifactId>
+    <groupId>org.ow2.jasmine</groupId>
+    <version>1.1.1-M2-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>agent.remote.jkmanager.rest.tests</artifactId>
+
+  <name>JASMINe :: Agent :: Remote :: JkManager :: REST Tests</name>
+
+  <properties>
+    <pax-exam.version>1.2.4</pax-exam.version>
+    <pax-runner.version>1.6.1</pax-runner.version>
+    <junit.version>4.5</junit.version>
+    <jdk.version>1.6</jdk.version>
+    <pax-exam-logging.version>1.6.1</pax-exam-logging.version>
+    <karaf.version>2.2.0</karaf.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.ow2.jasmine</groupId>
+      <artifactId>agent.remote.jkmanager.rest</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.jasmine</groupId>
+      <artifactId>agent.common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.bundles</groupId>
+      <artifactId>ow2-util-log</artifactId>
+      <version>${ow2-bundles.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- TESTING FRAMEWORK -->
+
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>4.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>1.8</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- TESTING -->
+
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.7</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam</artifactId>
+      <version>${pax-exam.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-default</artifactId>
+      <version>${pax-exam.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit</artifactId>
+      <version>${pax-exam.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-container-default</artifactId>
+      <version>${pax-exam.version}</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>pax-runner-no-jcl</artifactId>
+          <groupId>org.ops4j.pax.runner</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.runner</groupId>
+      <artifactId>pax-runner</artifactId>
+      <version>${pax-runner.version}</version>
+      <type>jar</type>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.exam</groupId>
+      <artifactId>pax-exam-junit-extender-impl</artifactId>
+      <version>${pax-exam.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ops4j.pax.logging</groupId>
+      <artifactId>pax-logging-api</artifactId>
+      <version>${pax-exam-logging.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit-dep</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.shell</artifactId>
+      <version>1.4.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.ipojo.arch</artifactId>
+      <version>1.6.0</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.chameleon.testing</groupId>
+      <artifactId>osgi-helpers</artifactId>
+      <version>0.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerVersion>${jdk.version}</compilerVersion>
+          <source>${jdk.version}</source>
+          <target>${jdk.version}</target>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.ops4j.pax.exam</groupId>
+        <artifactId>maven-paxexam-plugin</artifactId>
+        <version>${pax-exam.version}</version>
+        <executions>
+          <execution>
+            <id>generate-depends-file</id>
+            <goals>
+              <goal>generate-depends-file</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>generate-config</id>
+            <goals>
+              <goal>generate-config</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.servicemix.tooling</groupId>
+            <artifactId>depends-maven-plugin</artifactId>
+            <version>1.2</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>

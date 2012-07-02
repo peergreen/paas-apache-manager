@@ -84,6 +84,7 @@
         <module>vhost-manager</module>
         <module>proxy-manager</module>
         <module>rewrite-manager</module>
+        <module>jk-manager</module>
     </modules>
 
 </project>
