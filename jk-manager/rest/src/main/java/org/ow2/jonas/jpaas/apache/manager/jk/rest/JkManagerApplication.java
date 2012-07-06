@@ -25,13 +25,20 @@
 
 package org.ow2.jonas.jpaas.apache.manager.jk.rest;
 
-import org.apache.log4j.Logger;
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
 
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Invalidate;
+import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
+import org.apache.felix.ipojo.annotations.Validate;
 
 /**
  * REST application to provide the REST implementation of our services
@@ -39,12 +46,20 @@ import java.util.Set;
  *
  * @author Miguel González
  */
+@Component(name="JkManagerApplication", immediate = true)
+@Provides(specifications={javax.ws.rs.core.Application.class})
 public class JkManagerApplication extends Application {
 
+    private Log logger = LogFactory.getLog(this.getClass());
+
+    @Requires
     private JkManagerService jkManagerService;
 
-    public JkManagerApplication(JkManagerService jkManagerService){
-        this.jkManagerService = jkManagerService;
+    @ServiceProperty(name="jonas.jaxrs.context-path", value="/jkmanager")
+    private String jkContextName;
+
+
+    public JkManagerApplication(){
     }
 
     @Override
@@ -57,5 +72,15 @@ public class JkManagerApplication extends Application {
         Set<Object> objects = new HashSet<Object>();
         objects.add(new JkManager(jkManagerService));
         return objects;
+    }
+
+    @Validate
+    public void start() {
+        logger.debug("JkManagerApplication started");
+    }
+
+    @Invalidate
+    public void stop() {
+        logger.debug("JkManagerApplication stopped");
     }
 }

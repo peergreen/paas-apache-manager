@@ -63,7 +63,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Export-Package>org.ow2.jasmine.agent.common.*</Export-Package>
+            <Export-Package>org.ow2.jonas.jpaas.apache.manager.jk.api.*</Export-Package>
           </instructions>
         </configuration>
       </plugin>

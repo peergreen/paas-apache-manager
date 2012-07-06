@@ -21,10 +21,6 @@
 # $Id: agent.remote.jkmanager.rest.bnd 8741 2011-08-11 15:00:11Z gonzalem $
 # ---------------------------------------------------------------------------
 
+Import-Package *
 
-Export-Package org.ow2.jasmine.agent.remote.jkmanager.rest.api
-
-Import-Package javax.ws.rs, \
-               *
-
-Private-Package org.ow2.jasmine.agent.remote.jkmanager.rest.impl
+Private-Package org.ow2.jasmine.agent.remote.jkmanager.rest
