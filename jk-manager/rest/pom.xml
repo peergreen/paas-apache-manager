@@ -64,6 +64,12 @@
       <version>1.8.0</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.ow2.jonas</groupId>
+        <artifactId>jaxrs-jersey-core</artifactId>
+        <version>${jonas.version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>

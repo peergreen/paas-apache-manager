@@ -24,7 +24,13 @@
  */
 package org.ow2.jonas.jpaas.apache.manager.jk.rest;
 
-import javax.ws.rs.*;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 @Path("/")
 public interface IJkManager {
