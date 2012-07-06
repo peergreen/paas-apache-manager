@@ -21,10 +21,6 @@
 # $Id$
 # ---------------------------------------------------------------------------
 
+Import-Package *
 
-Export-Package org.ow2.jasmine.agent.remote.rewritemanager.rest.api
-
-Import-Package javax.ws.rs, \
-               *
-
-Private-Package org.ow2.jasmine.agent.remote.rewritemanager.rest.impl
+Private-Package org.ow2.jasmine.agent.remote.rewritemanager.rest

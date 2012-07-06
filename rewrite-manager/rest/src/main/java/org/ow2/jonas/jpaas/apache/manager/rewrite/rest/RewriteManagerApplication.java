@@ -27,7 +27,18 @@ package org.ow2.jonas.jpaas.apache.manager.rewrite.rest;
 
 import org.ow2.jonas.jpaas.apache.manager.rewrite.api.RewriteManagerService;
 
+import org.ow2.util.log.Log;
+import org.ow2.util.log.LogFactory;
+
 import javax.ws.rs.core.Application;
+
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Invalidate;
+import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.ServiceProperty;
+import org.apache.felix.ipojo.annotations.Validate;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,12 +48,19 @@ import java.util.Set;
  *
  * @author David Richard
  */
+@Component(name="RewriteManagerApplication", immediate = true)
+@Provides(specifications={javax.ws.rs.core.Application.class})
 public class RewriteManagerApplication extends Application {
 
+    private Log logger = LogFactory.getLog(this.getClass());
+
+    @Requires
     private RewriteManagerService rewriteManagerService;
 
-    public RewriteManagerApplication(RewriteManagerService rewriteManagerService) {
-        this.rewriteManagerService = rewriteManagerService;
+    @ServiceProperty(name="jonas.jaxrs.context-path", value="/rewritemanager")
+    private String rewriteContextName;
+
+    public RewriteManagerApplication() {
     }
 
     @Override
@@ -55,5 +73,15 @@ public class RewriteManagerApplication extends Application {
         Set<Object> objects = new HashSet<Object>();
         objects.add(new RewriteManager(rewriteManagerService));
         return objects;
+    }
+
+    @Validate
+    public void start() {
+        logger.debug("RewriteManagerApplication started");
+    }
+
+    @Invalidate
+    public void stop() {
+        logger.debug("RewriteManagerApplication stopped");
     }
 }
