@@ -27,19 +27,13 @@ package org.ow2.jonas.jpaas.apache.manager.ajpbalancer.osgi;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.jonas.jpaas.apache.manager.ajpbalancer.api.AjpBalancerManagerService;
-import org.ow2.jonas.lib.bootstrap.JProp;
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,16 +64,14 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
      */
     private String proxyBalancerConfigurationFile;
 
-
-    /**
-     * AjpBalancerManager property file name
-     */
-    private static final String AJP_BALANCER_MANAGER_PROPERTY_FILE_NAME = "ajpbalancermanager.properties";
+    @Requires
+    private ApacheUtilService apacheUtilService;
 
     @Validate
     public void start() {
         logger.info("Load default configuration");
-        String proxyBalancerConfigurationFile = getAjpBalancerPropertyFileLocation();
+        String proxyBalancerConfigurationFile =
+                apacheUtilService.getPropertyValue(PROXY_BALANCER_CONF_FILE_LOCATION_PROPERTY);
         this.setProxyBalancerConfigurationFile(proxyBalancerConfigurationFile);
 
         logger.info("proxyBalancerConfigurationFile=" + proxyBalancerConfigurationFile);
@@ -89,12 +81,9 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
      * {@inheritDoc}
      */
     public void addBalancerMember(String proxyBalancer, String host, String port, String lbFactor) {
-
         logger.info("addBalancerMember (" + proxyBalancer + "," + host + "," + port + ", " + lbFactor + ")");
 
-        String confFileLocation = getProxyBalancerConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyBalancerAlreadyCreated = false;
@@ -134,7 +123,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     /**
@@ -143,9 +132,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
     public void removeBalancerMember(String proxyBalancer, String host, String port) {
         logger.info("removeBalancerMember (" + proxyBalancer + "," + host + "," + port + ")");
 
-        String confFileLocation = getProxyBalancerConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inProxyBalancer = false;
@@ -162,7 +149,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     /**
@@ -170,9 +157,8 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
      */
     public void removeProxyBalancer(String proxyBalancer) {
         logger.info("removeProxyBalancer(" + proxyBalancer + ")");
-        String confFileLocation = getProxyBalancerConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inProxyBalancer = false;
@@ -190,7 +176,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     /**
@@ -207,9 +193,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
     public void mount(String proxyBalancer, String path) {
         logger.info("mountWorker (" + proxyBalancer + ", " + path + ")");
 
-        String confFileLocation = getProxyBalancerConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyMount = false;
@@ -225,7 +209,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             newFileStringList.add("ProxyPass " + path + " " + "balancer://" + proxyBalancer + "/");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     /**
@@ -233,9 +217,8 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
      */
     public void unmount(String proxyBalancer) {
         logger.info("unmount(" + proxyBalancer + ")");
-        String confFileLocation = getProxyBalancerConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
@@ -245,7 +228,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     /**
@@ -253,9 +236,8 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
      */
     public void unmount() {
         logger.info("unmount()");
-        String confFileLocation = getProxyBalancerConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(proxyBalancerConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
@@ -265,53 +247,7 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    private List<String> loadConfigurationFile(String filePath) {
-
-        List<String> fileStringList = new LinkedList<String>();
-        try {
-            InputStream ips = new FileInputStream(filePath);
-            InputStreamReader ipsr = new InputStreamReader(ips);
-            BufferedReader br = new BufferedReader(ipsr);
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                fileStringList.add(line);
-            }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return fileStringList;
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    private void flushConfigurationFile(String filePath,
-                                        List<String> fileStringList) {
-
-        try {
-            FileWriter fw = new FileWriter(filePath);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-                String string = iterator.next();
-                logger.info("flush : " + string);
-                pw.println(string);
-            }
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        apacheUtilService.flushConfigurationFile(proxyBalancerConfigurationFile, newFileStringList);
     }
 
     public String getProxyBalancerConfigurationFile() {
@@ -321,16 +257,4 @@ public class AjpBalancerManagerImpl implements AjpBalancerManagerService {
     public void setProxyBalancerConfigurationFile(String proxyBalancerConfigurationFile) {
         this.proxyBalancerConfigurationFile = proxyBalancerConfigurationFile;
     }
-
-    /**
-     * Get the property file location located in JONAS_BASE/conf/ajpbalancermanager.properties
-     * with the key file.location
-     *
-     * @return the location of the ajpbalancermanager.properties file
-     */
-    private String getAjpBalancerPropertyFileLocation() {
-        JProp prop = JProp.getInstance(AJP_BALANCER_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(PROXY_BALANCER_CONF_FILE_LOCATION_PROPERTY);
-    }
-
 }

@@ -118,10 +118,10 @@ public class ApacheUtil implements ApacheUtilService {
     public void start() throws Throwable {
         logger.debug("Starting ApacheUtil Service.");
         logger.info("Load default configuration");
-        String apacheConfigurationFileLocation = getApacheConfigurationFileLocation();
+        String apacheConfigurationFileLocation = getPropertyValue(APACHE_CONF_FILE_LOCATION_PROPERTY);
         this.setApacheConfigurationFile(apacheConfigurationFileLocation);
         logger.info("ApacheConfigurationFile=" + apacheConfigurationFile);
-        String vhostConfigurationFolderLocation = getVhostConfigurationFolderLocation();
+        String vhostConfigurationFolderLocation = getPropertyValue(VHOST_CONF_FOLDER_LOCATION_PROPERTY);
         this.setVhostConfigurationFolder(vhostConfigurationFolderLocation);
         logger.info("VhostConfigurationFolder=" + vhostConfigurationFolder);
 
@@ -149,27 +149,16 @@ public class ApacheUtil implements ApacheUtilService {
         this.vhostConfigurationFolder = vhostConfigurationFolder;
     }
 
-
     /**
-     * Get the property apache configuration file location located in JONAS_BASE/conf/apachemanager.properties
+     * Get a property value in Apache Manager properties file
      *
-     * @return the location of the apache configuration file
+     * @param  propertyName the name of the property
+     * @return the property value
      */
-    private String getApacheConfigurationFileLocation() {
+    public String getPropertyValue(String propertyName) {
         JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(APACHE_CONF_FILE_LOCATION_PROPERTY);
+        return prop.getValue(propertyName);
     }
-
-    /**
-     * Get the property vhost configuration folder location located in JONAS_BASE/conf/apachemanager.properties
-     *
-     * @return the location of the vhost configuration folder
-     */
-    private String getVhostConfigurationFolderLocation() {
-        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(VHOST_CONF_FOLDER_LOCATION_PROPERTY);
-    }
-
 
     /**
      * Load the configuration file

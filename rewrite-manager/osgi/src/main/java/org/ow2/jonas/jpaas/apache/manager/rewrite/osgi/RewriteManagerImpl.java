@@ -27,19 +27,13 @@ package org.ow2.jonas.jpaas.apache.manager.rewrite.osgi;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.jonas.jpaas.apache.manager.rewrite.api.RewriteManagerService;
-import org.ow2.jonas.lib.bootstrap.JProp;
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -70,16 +64,14 @@ public class RewriteManagerImpl implements RewriteManagerService {
      */
     private String rewriteConfigurationFile;
 
+    @Requires
+    private ApacheUtilService apacheUtilService;
 
-    /**
-     * RewriteManager property file name
-     */
-    private static final String REWRITE_MANAGER_PROPERTY_FILE_NAME = "rewritemanager.properties";
 
     @Validate
     public void start() {
         logger.info("Load default configuration");
-        String rewriteConfigurationFile = getRewritePropertyFileLocation();
+        String rewriteConfigurationFile = apacheUtilService.getPropertyValue(REWRITE_CONF_FILE_LOCATION_PROPERTY);
         this.setRewriteConfigurationFile(rewriteConfigurationFile);
 
         logger.info("rewriteConfigurationFile=" + rewriteConfigurationFile);
@@ -93,9 +85,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteRuleInDirectory (" + directoryDirective + "," + pattern + ","
                 + substitution + ", " + flag + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean directoryDirectiveAlreadyCreated = false;
@@ -133,7 +123,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Directory>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -143,9 +133,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteRuleInDirectory (" + directoryDirective + "," + pattern + ","
                 + substitution + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean directoryDirectiveAlreadyCreated = false;
@@ -183,7 +171,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Directory>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -193,9 +181,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteRuleInProxy (" + proxyDirective + "," + pattern + ","
                 + substitution + ", " + flag + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyDirectiveAlreadyCreated = false;
@@ -233,7 +219,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -243,9 +229,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteRuleInProxy (" + proxyDirective + "," + pattern + ","
                 + substitution + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyDirectiveAlreadyCreated = false;
@@ -283,7 +267,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -292,9 +276,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void removeRewriteRuleInDirectory(String directoryDirective, String pattern, String substitution) {
         logger.info("removeRewriteRuleInDirectory (" + directoryDirective + "," + pattern + "," + substitution + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inDirectoryDirective = false;
@@ -325,7 +307,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -334,9 +316,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void removeRewriteRuleInProxy(String proxyDirective, String pattern, String substitution) {
         logger.info("removeRewriteRuleInProxy (" + proxyDirective + "," + pattern + "," + substitution + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
 
@@ -368,7 +348,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -377,9 +357,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void addRewriteBaseInDirectory(String directoryDirective, String urlPath) {
         logger.info("addRewriteBaseInDirectory (" + directoryDirective + "," + urlPath + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean directoryDirectiveAlreadyCreated = false;
@@ -417,7 +395,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Directory>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -426,9 +404,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void addRewriteBaseInProxy(String proxyDirective, String urlPath) {
         logger.info("addRewriteBaseInProxy (" + proxyDirective + "," + urlPath + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyDirectiveAlreadyCreated = false;
@@ -466,7 +442,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -475,9 +451,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void removeRewriteBaseInDirectory(String directoryDirective, String urlPath) {
         logger.info("removeRewriteBaseInDirectory (" + directoryDirective + "," + urlPath + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inDirectoryDirective = false;
@@ -494,7 +468,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -503,9 +477,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void removeRewriteBaseInProxy(String proxyDirective, String urlPath) {
         logger.info("removeRewriteBaseInProxy (" + proxyDirective + "," + urlPath + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inProxyDirective = false;
@@ -522,7 +494,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void addRewriteCondInDirectory(String directoryDirective, String rulePattern, String ruleSubstitution,
@@ -530,9 +502,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteCondInDirectory (" + directoryDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern + "," + condFlag + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean directoryDirectiveAlreadyCreated = false;
@@ -581,7 +551,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Directory>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void addRewriteCondInDirectory(String directoryDirective, String rulePattern, String ruleSubstitution,
@@ -589,9 +559,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteCondInDirectory (" + directoryDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern +  ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean directoryDirectiveAlreadyCreated = false;
@@ -640,7 +608,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Directory>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void addRewriteCondInProxy(String proxyDirective, String rulePattern, String ruleSubstitution,
@@ -648,9 +616,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteCondInProxy (" + proxyDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern + "," + condFlag + ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyDirectiveAlreadyCreated = false;
@@ -699,7 +665,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void addRewriteCondInProxy(String proxyDirective, String rulePattern, String ruleSubstitution,
@@ -707,9 +673,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("addRewriteCondInProxy (" + proxyDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern +  ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean proxyDirectiveAlreadyCreated = false;
@@ -758,7 +722,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             newFileStringList.add("</Proxy>");
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void removeRewriteCondInDirectory(String directoryDirective, String rulePattern, String ruleSubstitution,
@@ -766,9 +730,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("removeRewriteCondInDirectory (" + directoryDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern +  ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inDirectoryDirective = false;
@@ -797,7 +759,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     public void removeRewriteCondInProxy(String proxyDirective, String rulePattern, String ruleSubstitution,
@@ -805,9 +767,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("removeRewriteCondInProxy (" + proxyDirective + "," + rulePattern + ","
                 + ruleSubstitution + "," + condTestString + "," + condPattern +  ")");
 
-        String confFileLocation = getRewriteConfigurationFile();
-
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inProxyDirective = false;
@@ -836,7 +796,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -844,9 +804,8 @@ public class RewriteManagerImpl implements RewriteManagerService {
      */
     public void removeDirectoryDirective(String directoryDirective) {
         logger.info("removeDirectoryDirective(" + directoryDirective + ")");
-        String confFileLocation = getRewriteConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inDirectoryDirective = false;
@@ -863,7 +822,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -871,9 +830,8 @@ public class RewriteManagerImpl implements RewriteManagerService {
      */
     public void removeProxyDirective(String proxyDirective) {
         logger.info("removeProxyDirective(" + proxyDirective + ")");
-        String confFileLocation = getRewriteConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(rewriteConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean inProxyDirective = false;
@@ -890,7 +848,7 @@ public class RewriteManagerImpl implements RewriteManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(rewriteConfigurationFile, newFileStringList);
     }
 
     /**
@@ -901,53 +859,6 @@ public class RewriteManagerImpl implements RewriteManagerService {
         logger.info("rewriteConfigurationFile=" +  rewriteConfigurationFile);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    private List<String> loadConfigurationFile(String filePath) {
-
-        List<String> fileStringList = new LinkedList<String>();
-        try {
-            InputStream ips = new FileInputStream(filePath);
-            InputStreamReader ipsr = new InputStreamReader(ips);
-            BufferedReader br = new BufferedReader(ipsr);
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                fileStringList.add(line);
-            }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return fileStringList;
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    private void flushConfigurationFile(String filePath,
-                                        List<String> fileStringList) {
-
-        try {
-            FileWriter fw = new FileWriter(filePath);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-                String string = iterator.next();
-                logger.info("flush : " + string);
-                pw.println(string);
-            }
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public String getRewriteConfigurationFile() {
         return rewriteConfigurationFile;
     }
@@ -955,16 +866,4 @@ public class RewriteManagerImpl implements RewriteManagerService {
     public void setRewriteConfigurationFile(String rewriteConfigurationFile) {
         this.rewriteConfigurationFile = rewriteConfigurationFile;
     }
-
-    /**
-     * Get the property file location located in JONAS_BASE/conf/rewritemanager.properties
-     * with the key file.location
-     *
-     * @return the location of the rewritemanager.properties file
-     */
-    private String getRewritePropertyFileLocation() {
-        JProp prop = JProp.getInstance(REWRITE_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(REWRITE_CONF_FILE_LOCATION_PROPERTY);
-    }
-
 }

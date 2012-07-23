@@ -58,10 +58,9 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.ow2.jonas</groupId>
-      <artifactId>jonas-commons</artifactId>
-      <version>${jonas.version}</version>
-      <scope>provided</scope>
+      <groupId>org.ow2.bundles</groupId>
+      <artifactId>ow2-util-log</artifactId>
+      <version>${ow2-bundles.version}</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>

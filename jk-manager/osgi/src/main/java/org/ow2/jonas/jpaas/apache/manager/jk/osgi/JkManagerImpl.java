@@ -25,7 +25,6 @@
 
 package org.ow2.jonas.jpaas.apache.manager.jk.osgi;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
-import org.ow2.jonas.lib.bootstrap.JProp;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -53,11 +51,6 @@ public class JkManagerImpl implements JkManagerService {
      * Logger
      */
     private static Log logger = LogFactory.getLog(JkManagerImpl.class);
-
-    /**
-     * JKManager property file name
-     */
-    private static final String JKMANAGER_PROPERTY_FILE_NAME = "jkmanager.properties";
 
     /**
      * Property name to define the workers.properties path
@@ -83,7 +76,7 @@ public class JkManagerImpl implements JkManagerService {
      * Reload cmd
      */
     private String reloadCmd;
-    
+
     @Requires
     private ApacheUtilService apacheUtilService;
 
@@ -91,10 +84,10 @@ public class JkManagerImpl implements JkManagerService {
     @Validate
     public void start() {
         logger.info("Load default configuration");
-        String workersConfigurationFile = getJkPropertyFileLocation();
+        String workersConfigurationFile = apacheUtilService.getPropertyValue(WORKERS_PROPERTY_FILE_LOCATION_PROPERTY);
         this.setWorkersConfigurationFile(workersConfigurationFile);
 
-        String jkConfFile = getJkConfigurationFileLocation();
+        String jkConfFile = apacheUtilService.getPropertyValue(JK_CONF_FILE_LOCATION_PROPERTY);
         this.setJkConfigurationFile(jkConfFile);
 
         logger.info("workersConfigurationFile=" + workersConfigurationFile);
@@ -331,12 +324,9 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void mount(String loadbalancer, String path) {
-
         logger.info("mountWorker (" + path + ", " + loadbalancer + ")");
 
-        String jkConfFileLocation = getJkConfigurationFileLocation();
-
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -358,18 +348,16 @@ public class JkManagerImpl implements JkManagerService {
         newFileStringList.add("");
         newFileStringList.add("JkMountCopy  All");
 
-        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfigurationFile, newFileStringList);
     }
 
     /**
      * {@inheritDoc}
      */
     public void unmount() {
-
         logger.info("unmount()");
-        String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -380,18 +368,16 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfigurationFile, newFileStringList);
     }
 
     /**
      * {@inheritDoc}
      */
     public void unmount(String loadbalancer) {
-
         logger.info("unmount(" + loadbalancer + ")");
-        String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -402,18 +388,16 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfigurationFile, newFileStringList);
     }
 
     /**
      * {@inheritDoc}
      */
     public void unmount(String loadbalancer, String path) {
-
         logger.info("unmount(" + loadbalancer + ", " + path + ")");
-        String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -425,7 +409,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfigurationFile, newFileStringList);
     }
 
     /**
@@ -502,26 +486,6 @@ public class JkManagerImpl implements JkManagerService {
 
     public String getId() {
         return "";
-    }
-
-    /**
-     * Get the property file location located in JONAS_BASE/conf/jkmanager.properties with the key file.location
-     *
-     * @return the location of the workers.properties file
-     */
-    private String getJkPropertyFileLocation() {
-        JProp prop = JProp.getInstance(JKMANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(WORKERS_PROPERTY_FILE_LOCATION_PROPERTY);
-    }
-
-    /**
-     * Get the property file location located in JONAS_BASE/conf/jkmanager.properties with the key file.location
-     *
-     * @return the location of the workers.properties file
-     */
-    private String getJkConfigurationFileLocation() {
-        JProp prop = JProp.getInstance(JKMANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(JK_CONF_FILE_LOCATION_PROPERTY);
     }
 
     private String getWorkersConfigurationFile() {

@@ -35,7 +35,6 @@ import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerExceptio
 import org.ow2.jonas.jpaas.apache.manager.proxy.manager.api.ProxyManagerService;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
-import org.ow2.jonas.lib.bootstrap.JProp;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
@@ -64,12 +63,6 @@ public class ProxyManager implements ProxyManagerService {
      */
     private String proxyConfigurationFile;
 
-
-    /**
-     * ProxyManager property file name
-     */
-    private static final String PROXY_MANAGER_PROPERTY_FILE_NAME = "proxymanager.properties";
-
     @Requires
     private ApacheUtilService apacheUtilService;
 
@@ -77,8 +70,8 @@ public class ProxyManager implements ProxyManagerService {
     @Validate
     public void start() {
         logger.info("Load default configuration");
-        String apacheConfigurationFileLocation = getApacheConfigurationFileLocation();
-        this.setProxyConfigurationFile(apacheConfigurationFileLocation);
+        String proxyConfigurationFileLocation = apacheUtilService.getPropertyValue(PROXY_CONF_FILE_LOCATION_PROPERTY);
+        this.setProxyConfigurationFile(proxyConfigurationFileLocation);
         logger.info("ProxyConfigurationFile=" + proxyConfigurationFile);
     }
 
@@ -243,15 +236,4 @@ public class ProxyManager implements ProxyManagerService {
     public void setProxyConfigurationFile(String proxyConfigurationFile) {
         this.proxyConfigurationFile = proxyConfigurationFile;
     }
-
-    /**
-     * Get the property proxy configuration file location located in JONAS_BASE/conf/proxymanager.properties
-     *
-     * @return the location of the apache configuration file
-     */
-    private String getApacheConfigurationFileLocation() {
-        JProp prop = JProp.getInstance(PROXY_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(PROXY_CONF_FILE_LOCATION_PROPERTY);
-    }
-
 }

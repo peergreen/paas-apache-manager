@@ -35,6 +35,14 @@ import java.util.List;
 public interface ApacheUtilService {
 
     /**
+     * Get a property value in Apache Manager properties file
+     *
+     * @param  propertyName the name of the property
+     * @return the property value
+     */
+    public String getPropertyValue(String propertyName);
+
+    /**
      * Load the configuration file
      * @param filePath path of the configuration file
      * @return a list with the configuration lines

@@ -50,10 +50,9 @@
       <version>${ow2-bundles.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.ow2.jonas</groupId>
-      <artifactId>jonas-commons</artifactId>
-      <version>${jonas.version}</version>
-      <scope>provided</scope>
+      <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
+      <artifactId>util-api</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
