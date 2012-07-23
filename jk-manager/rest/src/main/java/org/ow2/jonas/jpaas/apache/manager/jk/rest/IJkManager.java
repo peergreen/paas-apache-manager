@@ -81,10 +81,6 @@ public interface IJkManager {
     void unmount();
 
     @POST
-    @Path("/reload")
-    void reload();
-
-    @POST
     @Path("/init")
     void init(@FormParam("workersConfigurationFileName")
               String workersConfigurationFile,

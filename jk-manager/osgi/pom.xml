@@ -63,6 +63,11 @@
       <version>${jonas.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
+      <artifactId>util-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

@@ -107,12 +107,6 @@ public interface JkManagerService {
      */
     void stopNamedWorker(String name);
 
-
-    /**
-     * reload apache2 configuration
-     */
-    void reload();
-
     /**
      * init configuration
      */

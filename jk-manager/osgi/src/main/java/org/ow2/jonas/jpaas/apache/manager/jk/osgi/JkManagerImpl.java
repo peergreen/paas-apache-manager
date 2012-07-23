@@ -25,22 +25,17 @@
 
 package org.ow2.jonas.jpaas.apache.manager.jk.osgi;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
+import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.jonas.lib.bootstrap.JProp;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -75,16 +70,6 @@ public class JkManagerImpl implements JkManagerService {
     private static final String JK_CONF_FILE_LOCATION_PROPERTY = "jk.conf.location";
 
     /**
-     * Property name to define the reload cmd
-     */
-    private static final String CMD_RELOAD_NAME_PROPERTY = "apache.cmd.reload.name";
-
-    /**
-     * Property name to define the reload arg
-     */
-    private static final String CMD_RELOAD_ARG_PROPERTY = "apache.cmd.reload.arg";
-
-    /**
      * Path to the workers.properties file
      */
     private String workersConfigurationFile;
@@ -98,6 +83,9 @@ public class JkManagerImpl implements JkManagerService {
      * Reload cmd
      */
     private String reloadCmd;
+    
+    @Requires
+    private ApacheUtilService apacheUtilService;
 
 
     @Validate
@@ -109,24 +97,10 @@ public class JkManagerImpl implements JkManagerService {
         String jkConfFile = getJkConfigurationFileLocation();
         this.setJkConfigurationFile(jkConfFile);
 
-        String command = getPropertyApacheReloadCmdName();
-        String arg = getPropertyApacheReloadOptArg();
-        if (command == null || arg == null) {
-            command = "/etc/init.d/apache2 reload";
-        } else {
-            command += " " + arg;
-        }
-        this.setReloadCmd(command);
-
         logger.info("workersConfigurationFile=" + workersConfigurationFile);
         logger.info("jkConfigurationFile=" + jkConfigurationFile);
-        logger.info("reloadCmd=" + command);
-
     }
 
-    /**
-     *
-     */
     /**
      * {@inheritDoc}
      */
@@ -161,7 +135,7 @@ public class JkManagerImpl implements JkManagerService {
 
         String confFileLocation = getWorkersConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -209,7 +183,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
     }
 
     /**
@@ -221,7 +195,7 @@ public class JkManagerImpl implements JkManagerService {
 
         String confFileLocation = getWorkersConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean loadBalancerIsEmpty = false;
@@ -286,7 +260,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
     }
 
     /**
@@ -321,7 +295,7 @@ public class JkManagerImpl implements JkManagerService {
 
         String confFileLocation = getWorkersConfigurationFile();
 
-        List<String> fileStringList = loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
         boolean found = false;
 
@@ -340,25 +314,7 @@ public class JkManagerImpl implements JkManagerService {
             newFileStringList.add(activationBalancedString);
         }
 
-        flushConfigurationFile(confFileLocation, newFileStringList);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void reload() {
-
-        String command = getReloadCmd();
-
-        try {
-            logger.info("Execute command {0}", command);
-            Runtime.getRuntime().exec(command);
-        } catch (IOException e) {
-            if (logger.isDebugEnabled()) {
-                e.printStackTrace();
-            }
-            logger.error("Cannot reload Apache HTTP configuration : {0}", e.getMessage());
-        }
+        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
     }
 
     /**
@@ -368,10 +324,7 @@ public class JkManagerImpl implements JkManagerService {
      */
     public void init(String workersConfigurationFile, String reloadCmd) {
         setWorkersConfigurationFile(workersConfigurationFile);
-        setReloadCmd(reloadCmd);
         logger.info("workersConfigurationFile=" +  workersConfigurationFile);
-        logger.info("reloadCmd=" + reloadCmd);
-
     }
 
     /**
@@ -383,7 +336,7 @@ public class JkManagerImpl implements JkManagerService {
 
         String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -405,7 +358,7 @@ public class JkManagerImpl implements JkManagerService {
         newFileStringList.add("");
         newFileStringList.add("JkMountCopy  All");
 
-        flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
     }
 
     /**
@@ -416,7 +369,7 @@ public class JkManagerImpl implements JkManagerService {
         logger.info("unmount()");
         String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -427,7 +380,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
     }
 
     /**
@@ -438,7 +391,7 @@ public class JkManagerImpl implements JkManagerService {
         logger.info("unmount(" + loadbalancer + ")");
         String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -449,7 +402,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
     }
 
     /**
@@ -460,7 +413,7 @@ public class JkManagerImpl implements JkManagerService {
         logger.info("unmount(" + loadbalancer + ", " + path + ")");
         String jkConfFileLocation = getJkConfigurationFileLocation();
 
-        List<String> fileStringList = loadConfigurationFile(jkConfFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfFileLocation);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -472,7 +425,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        flushConfigurationFile(jkConfFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(jkConfFileLocation, newFileStringList);
     }
 
     /**
@@ -482,7 +435,7 @@ public class JkManagerImpl implements JkManagerService {
 
 
         List<String> fileStringList =
-                loadConfigurationFile(getWorkersConfigurationFile());
+                apacheUtilService.loadConfigurationFile(getWorkersConfigurationFile());
 
         logger.info("name=" +  name);
 
@@ -524,7 +477,7 @@ public class JkManagerImpl implements JkManagerService {
             return false;
         } else {
             List<String> fileStringList =
-                    loadConfigurationFile(getWorkersConfigurationFile());
+                    apacheUtilService.loadConfigurationFile(getWorkersConfigurationFile());
 
             for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
                 String string = iterator.next();
@@ -571,70 +524,6 @@ public class JkManagerImpl implements JkManagerService {
         return prop.getValue(JK_CONF_FILE_LOCATION_PROPERTY);
     }
 
-    /**
-     * @return Get the reload cmd
-     */
-    private String getPropertyApacheReloadCmdName() {
-        JProp prop = JProp.getInstance(JKMANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(CMD_RELOAD_NAME_PROPERTY);
-    }
-
-    /**
-     * @return Get the reload cmd arg
-     */
-    private String getPropertyApacheReloadOptArg() {
-        JProp prop = JProp.getInstance(JKMANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(CMD_RELOAD_ARG_PROPERTY);
-    }
-
-
-
-    /**
-     * {@inheritDoc}
-     */
-    private List<String> loadConfigurationFile(String filePath) {
-
-        List<String> fileStringList = new LinkedList<String>();
-        try {
-            InputStream ips = new FileInputStream(filePath);
-            InputStreamReader ipsr = new InputStreamReader(ips);
-            BufferedReader br = new BufferedReader(ipsr);
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                fileStringList.add(line);
-            }
-            br.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return fileStringList;
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    private void flushConfigurationFile(String filePath,
-                                        List<String> fileStringList) {
-
-        try {
-            FileWriter fw = new FileWriter(filePath);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-
-            for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
-                String string = iterator.next();
-                logger.info("flush : " + string);
-                pw.println(string);
-            }
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private String getWorkersConfigurationFile() {
         return workersConfigurationFile;
     }
@@ -646,14 +535,4 @@ public class JkManagerImpl implements JkManagerService {
     private void setJkConfigurationFile(String jkConfigurationFile) {
         this.jkConfigurationFile = jkConfigurationFile;
     }
-
-    private String getReloadCmd() {
-        return reloadCmd;
-    }
-
-    private void setReloadCmd(String reloadCmd) {
-        this.reloadCmd = reloadCmd;
-    }
-
-
 }

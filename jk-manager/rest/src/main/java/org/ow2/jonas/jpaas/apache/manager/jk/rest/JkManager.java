@@ -116,11 +116,6 @@ public class JkManager implements IJkManager{
         jkManagerService.unmount();
     }
 
-    public void reload() {
-        logger.warn("Inbound call to reload()");
-        jkManagerService.reload();
-    }
-
     public void init(String workersConfigurationFile, String reloadCmd) {
         logger.debug("Inbound call to init()");
         logger.debug("(workersConfigurationFile, reloadCmd) = ("
