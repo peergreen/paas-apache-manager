@@ -39,37 +39,36 @@
   <name>JPaaS :: Apache Manager :: Jk Manager :: REST</name>
 
   <dependencies>
-
     <dependency>
       <groupId>org.ow2.bundles</groupId>
       <artifactId>ow2-util-log</artifactId>
       <version>${ow2-bundles.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
       <artifactId>jk-manager-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo</artifactId>
       <version>1.8.0</version>
     </dependency>
-
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.ipojo.annotations</artifactId>
       <version>1.8.0</version>
     </dependency>
-
     <dependency>
         <groupId>org.ow2.jonas</groupId>
         <artifactId>jaxrs-jersey-core</artifactId>
         <version>${jonas.version}</version>
     </dependency>
-
+    <dependency>
+        <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
+        <artifactId>util-api</artifactId>
+        <version>${project.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

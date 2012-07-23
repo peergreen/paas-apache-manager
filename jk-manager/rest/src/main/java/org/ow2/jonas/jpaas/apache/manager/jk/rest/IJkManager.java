@@ -30,7 +30,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("/")
 public interface IJkManager {
@@ -38,17 +41,17 @@ public interface IJkManager {
     @POST
     @Path("/worker/{name}/loadbalancer/{loadbalancer}")
     void addNamedWorker(@PathParam("name") String name,
-                        @PathParam("loadbalancer") String loadbalancer,
-                        @FormParam("host") String host,
-                        @FormParam("port") String port,
-                        @FormParam("lbFactor") String lbFactor);
+            @PathParam("loadbalancer") String loadbalancer,
+            @FormParam("host") String host,
+            @FormParam("port") String port,
+            @FormParam("lbFactor") String lbFactor);
 
     @POST
     @Path("/worker/loadbalancer/{loadbalancer}")
     void addWorker(@PathParam("loadbalancer")String loadbalancer,
-                   @FormParam("host")String host,
-                   @FormParam("port")String port,
-                   @FormParam("lbFactor")String lbFactor);
+            @FormParam("host")String host,
+            @FormParam("port")String port,
+            @FormParam("lbFactor")String lbFactor);
 
     @DELETE
     @Path("/worker/{name}")
@@ -69,12 +72,12 @@ public interface IJkManager {
     @POST
     @Path("/mount/{loadbalancer}")
     void mount(@PathParam("loadbalancer") String loadbalancer,
-               @FormParam("path") String path);
+            @FormParam("path") String path);
 
     @DELETE
     @Path("/mount/{loadbalancer}")
     void unmount(@PathParam("loadbalancer") String loadbalancer,
-                 @QueryParam("path") String path);
+            @QueryParam("path") String path);
 
     @DELETE
     @Path("/mount")
@@ -83,9 +86,9 @@ public interface IJkManager {
     @POST
     @Path("/init")
     void init(@FormParam("workersConfigurationFileName")
-              String workersConfigurationFile,
-              @FormParam("reloadCmd")
-              String reloadCmd);
+    String workersConfigurationFile,
+            @FormParam("reloadCmd")
+            String reloadCmd);
 
     @GET
     @Path("/worker/{name}/configured")
@@ -98,5 +101,18 @@ public interface IJkManager {
     @GET
     @Path("/id")
     String getId();
+
+    @POST
+    @Path("/worker/{name}")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response addNamedWorker(@PathParam("name") String name,
+            @QueryParam("host") String host,
+            @QueryParam("port") String port);
+
+    @POST
+    @Path("/worker")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response addWorker(@QueryParam("host") String host,
+            @QueryParam("port") String port);
 
 }

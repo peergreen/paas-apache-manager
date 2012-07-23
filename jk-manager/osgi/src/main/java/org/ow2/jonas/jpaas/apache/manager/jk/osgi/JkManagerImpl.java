@@ -33,6 +33,7 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
+import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerException;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
@@ -113,6 +114,38 @@ public class JkManagerImpl implements JkManagerService {
     }
 
     /**
+     * @param name the name of the worker
+     * @param host the host of the worker
+     * @param port the port of the worker
+     */
+    @Override
+    public void addNamedWorker(String name, String host, String port) throws JkManagerException {
+        logger.info("addNamedWorker (" + name + "," + host + "," + port + ")");
+
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
+        List<String> newFileStringList = new LinkedList<String>();
+
+        boolean alreadyConfigured = false;
+        // We need to know if there is already a worker
+        for (String string : fileStringList) {
+            if (string.contains("worker." + name + ".host")) {
+                alreadyConfigured = true;
+                throw new JkManagerException("A worker named " + name + " is already present");
+            }
+            newFileStringList.add(string);
+        }
+
+        if (!alreadyConfigured) {
+            newFileStringList.add("worker." + name + ".port=" + port);
+            newFileStringList.add("worker." + name + ".host=" + host);
+            newFileStringList.add("worker." + name + ".type=ajp13");
+            newFileStringList.add("worker." + name + ".activation=" + "a");
+        }
+
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void addNamedWorker(String name, String loadbalancer, String host, String port) {
@@ -123,12 +156,9 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void addNamedWorker(String name, String loadbalancer, String host, String port, String lbFactor) {
-
         logger.info("addNamedWorker (" + name + "," + loadbalancer + "," + host + "," + port + ", " + lbFactor + ")");
 
-        String confFileLocation = getWorkersConfigurationFile();
-
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean alreadyConfigured = false;
@@ -176,19 +206,27 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
+    }
+
+    /**
+     * @param host the host to add
+     * @param port the port of the host
+     */
+    @Override
+    public void addWorker(String host, String port) throws JkManagerException {
+        String workerName = "worker";
+        workerName += Math.round(Math.random() * 100000) + 100;
+        addNamedWorker(workerName, host, port);
     }
 
     /**
      * {@inheritDoc}
      */
     public void removeNamedWorker(String name) {
-
         logger.info("removeNamedWorker (" + name + ")");
 
-        String confFileLocation = getWorkersConfigurationFile();
-
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
         boolean loadBalancerIsEmpty = false;
@@ -200,7 +238,7 @@ public class JkManagerImpl implements JkManagerService {
                 String[] balancerString = string.split("=");
                 String[] balancedString = balancerString[1].split(",");
                 // if there is only one balanced worker remaining, we have to delete the whole load balancer
-                if(balancedString.length == 1) {
+                if(balancedString.length == 1 && balancedString[0].equals(name)) {
                     loadBalancerIsEmpty = true;
                     lbToDelete = balancerString[0].split("\\.")[1];
                 } else {
@@ -253,7 +291,7 @@ public class JkManagerImpl implements JkManagerService {
             }
         }
 
-        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
     }
 
     /**
@@ -285,10 +323,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     private void modifyStateNamedWorker(String name, String state) {
-
-        String confFileLocation = getWorkersConfigurationFile();
-
-        List<String> fileStringList = apacheUtilService.loadConfigurationFile(confFileLocation);
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
         boolean found = false;
 
@@ -307,7 +342,7 @@ public class JkManagerImpl implements JkManagerService {
             newFileStringList.add(activationBalancedString);
         }
 
-        apacheUtilService.flushConfigurationFile(confFileLocation, newFileStringList);
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
     }
 
     /**
@@ -417,9 +452,8 @@ public class JkManagerImpl implements JkManagerService {
      */
     public boolean isConfigured(String name) {
 
-
         List<String> fileStringList =
-                apacheUtilService.loadConfigurationFile(getWorkersConfigurationFile());
+                apacheUtilService.loadConfigurationFile(workersConfigurationFile);
 
         logger.info("name=" +  name);
 
@@ -461,7 +495,7 @@ public class JkManagerImpl implements JkManagerService {
             return false;
         } else {
             List<String> fileStringList =
-                    apacheUtilService.loadConfigurationFile(getWorkersConfigurationFile());
+                    apacheUtilService.loadConfigurationFile(workersConfigurationFile);
 
             for (Iterator<String> iterator = fileStringList.iterator(); iterator.hasNext();) {
                 String string = iterator.next();

@@ -34,6 +34,16 @@ public interface JkManagerService {
     /**
      * @param name
      *            the name of the worker
+     * @param host
+     *            the host of the worker
+     * @param port
+     *            the port of the worker
+     */
+    void addNamedWorker(String name, String host, String port) throws JkManagerException;
+
+    /**
+     * @param name
+     *            the name of the worker
      * @param loadbalancer
      *            the name of the loadbalancer to connect
      * @param host
@@ -56,6 +66,14 @@ public interface JkManagerService {
      *            the load balancing factor
      */
     void addNamedWorker(String name, String loadbalancer, String host, String port, String lbFactor);
+
+    /**
+     * @param host
+     *            the host to add
+     * @param port
+     *            the port of the host
+     */
+    void addWorker(String host, String port) throws JkManagerException;
 
     /**
      * @param loadbalancer

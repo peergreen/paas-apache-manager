@@ -25,10 +25,14 @@
 
 package org.ow2.jonas.jpaas.apache.manager.jk.rest;
 
+import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerException;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
-import org.ow2.jonas.jpaas.apache.manager.jk.rest.IJkManager;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
+
+import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 public class JkManager implements IJkManager{
 
@@ -36,9 +40,13 @@ public class JkManager implements IJkManager{
 
     private Log logger = LogFactory.getLog(this.getClass());
 
+    /**
+     * End of Line
+     */
+    public static final String EOL = "\n";
+
     public JkManager(JkManagerService jkManagerService) {
         this.jkManagerService = jkManagerService;
-
     }
 
     public void addNamedWorker(String name, String loadbalancer,
@@ -138,5 +146,43 @@ public class JkManager implements IJkManager{
     public String getId() {
         logger.debug("Inbound call to getId()");
         return jkManagerService.getId();
+    }
+
+    public Response addNamedWorker(String name, String host, String port) {
+        logger.debug("Inbound call to addNamedWorker()");
+        logger.debug("(name, host, port) = ("
+                + name + ", " + host + "," + port + ")");
+        try {
+            jkManagerService.addNamedWorker(name, host, port);
+        } catch (JkManagerException e) {
+            logger.error("Cannot create the Worker named " + name + ".", e.getCause());
+            Error error = new Error();
+            error.setMessage("Cannot create the Worker named " + name + "." + EOL + e.getCause());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.CREATED)
+                .build();
+    }
+
+    public Response addWorker(String host, String port) {
+        logger.debug("Inbound call to addWorker()");
+        logger.debug("(host, port) = ("
+                + host + "," + port + ")");
+        try {
+            jkManagerService.addWorker(host, port);
+        } catch (JkManagerException e) {
+            logger.error("Cannot create the Worker.", e.getCause());
+            Error error = new Error();
+            error.setMessage("Cannot create the Worker named." + EOL + e.getCause());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.CREATED)
+                .build();
     }
 }
