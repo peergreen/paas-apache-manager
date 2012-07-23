@@ -79,7 +79,7 @@ public class ApacheUtil implements ApacheUtilService {
 
 
     /**
-     * VhostManager property file name
+     * Apache Manager property file name
      */
     private static final String APACHE_MANAGER_PROPERTY_FILE_NAME = "apachemanager.properties";
 
@@ -92,6 +92,26 @@ public class ApacheUtil implements ApacheUtilService {
      * Directive ID template
      */
     private static final String DIRECTIVE_ID_TEMPLATE = "#id=(\\d*)";
+
+    /**
+     * Property name to define the apache cmd
+     */
+    private static final String CMD_APACHE_PROPERTY = "apache.cmd.name";
+
+    /**
+     * Property name to define the reload arg
+     */
+    private static final String CMD_RELOAD_ARG_PROPERTY = "apache.cmd.reload.arg";
+
+    /**
+     * Property name to define the start arg
+     */
+    private static final String CMD_START_ARG_PROPERTY = "apache.cmd.start.arg";
+
+    /**
+     * Property name to define the stop arg
+     */
+    private static final String CMD_STOP_ARG_PROPERTY = "apache.cmd.stop.arg";
 
 
     @Validate
@@ -571,4 +591,78 @@ public class ApacheUtil implements ApacheUtilService {
         flushConfigurationFile(file, newFileStringList);
     }
 
+    /**
+     * @return Get the reload command
+     */
+    private String getApacheReloadCmd() {
+        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
+        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
+        String reloadArg = prop.getValue(CMD_RELOAD_ARG_PROPERTY);
+        return apacheCmd + " " + reloadArg;
+    }
+
+    /**
+     * @return Get the start command
+     */
+    private String getApacheStartCmd() {
+        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
+        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
+        String startArg = prop.getValue(CMD_START_ARG_PROPERTY);
+        return apacheCmd + " " + startArg;
+    }
+
+    /**
+     * @return Get the stop command
+     */
+    private String getApacheStopCmd() {
+        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
+        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
+        String stopArg = prop.getValue(CMD_STOP_ARG_PROPERTY);
+        return apacheCmd + " " + stopArg;
+    }
+
+    /**
+     * reload apache2 configuration
+     */
+    public void reloadApache() throws ApacheManagerException {
+
+        String command = getApacheReloadCmd();
+
+        try {
+            logger.debug("Execute command {0}", command);
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new ApacheManagerException("Cannot reload Apache HTTP configuration : {0}", e.getCause());
+        }
+    }
+
+    /**
+     * start apache2
+     */
+    public void startApache() throws ApacheManagerException {
+
+        String command = getApacheStartCmd();
+
+        try {
+            logger.debug("Execute command {0}", command);
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new ApacheManagerException("Cannot start Apache HTTP : {0}", e.getCause());
+        }
+    }
+
+    /**
+     * stop apache2
+     */
+    public void stopApache() throws ApacheManagerException {
+
+        String command = getApacheStopCmd();
+
+        try {
+            logger.debug("Execute command {0}", command);
+            Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new ApacheManagerException("Cannot stop Apache HTTP : {0}", e.getCause());
+        }
+    }
 }

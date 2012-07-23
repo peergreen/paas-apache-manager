@@ -184,4 +184,19 @@ public interface ApacheUtilService {
      */
     public void removeDirectiveInFile(String file, long directiveID) throws ApacheManagerException;
 
+    /**
+     * reload apache2 configuration
+     */
+    public void reloadApache() throws ApacheManagerException;
+
+    /**
+     * start apache2
+     */
+    public void startApache() throws ApacheManagerException;
+
+    /**
+     * stop apache2
+     */
+    public void stopApache() throws ApacheManagerException;
+
 }
