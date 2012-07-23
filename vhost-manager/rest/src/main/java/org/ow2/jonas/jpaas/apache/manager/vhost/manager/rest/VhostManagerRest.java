@@ -41,7 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * ProxyManager REST implementation
+ * VhostManager REST implementation
  * @author David Richard
  */
 public class VhostManagerRest implements IVhostManager {
@@ -52,7 +52,7 @@ public class VhostManagerRest implements IVhostManager {
     private static Log logger = LogFactory.getLog(VhostManagerRest.class);
 
     /**
-     * ProxyManager Service
+     * VhostManager Service
      */
     private VhostManagerService vhostManagerService;
 
