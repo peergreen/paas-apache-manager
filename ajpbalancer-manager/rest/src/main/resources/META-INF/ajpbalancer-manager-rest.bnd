@@ -22,9 +22,7 @@
 # ---------------------------------------------------------------------------
 
 
-Export-Package org.ow2.jasmine.agent.remote.jkmanager.rest.api
-
 Import-Package javax.ws.rs, \
                *
 
-Private-Package org.ow2.jasmine.agent.remote.jkmanager.rest.impl
+Private-Package org.ow2.jonas.jpaas.apache.manager.ajpbalancer.rest.*
