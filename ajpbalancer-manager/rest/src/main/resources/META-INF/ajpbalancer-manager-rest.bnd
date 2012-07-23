@@ -22,7 +22,6 @@
 # ---------------------------------------------------------------------------
 
 
-Import-Package javax.ws.rs, \
-               *
+Import-Package *
 
 Private-Package org.ow2.jonas.jpaas.apache.manager.ajpbalancer.rest.*

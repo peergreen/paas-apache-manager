@@ -23,7 +23,7 @@
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.jonas.jpaas.apache.manager.jk.rest;
+package org.ow2.jonas.jpaas.apache.manager.ajpbalancer.rest;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;

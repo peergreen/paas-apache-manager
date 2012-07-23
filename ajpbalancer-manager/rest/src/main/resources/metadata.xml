@@ -29,8 +29,6 @@
   xmlns="org.apache.felix.ipojo"
   xsi:schemaLocation="org.apache.felix.ipojo http://felix.apache.org/ipojo/schemas/1.4.0/core.xsd">
 
-
-  <instance component="JkManagerActivator" />
-  <instance component="AjpBalancerManagerActivator" />
+  <instance component="AjpBalancerManagerApplication" />
 
 </ipojo>

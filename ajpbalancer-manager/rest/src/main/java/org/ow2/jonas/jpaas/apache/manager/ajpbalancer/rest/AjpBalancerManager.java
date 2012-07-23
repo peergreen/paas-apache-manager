@@ -23,7 +23,7 @@
  * --------------------------------------------------------------------------
  */
 
-package org.ow2.jonas.jpaas.apache.manager.jk.rest;
+package org.ow2.jonas.jpaas.apache.manager.ajpbalancer.rest;
 
 import org.ow2.jonas.jpaas.apache.manager.ajpbalancer.api.AjpBalancerManagerService;
 import org.ow2.util.log.Log;

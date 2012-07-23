@@ -65,16 +65,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.ow2.carol</groupId>
-      <artifactId>carol</artifactId>
-      <version>3.0.8</version>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-server</artifactId>
-      <version>1.8</version>
+      <groupId>org.ow2.jonas</groupId>
+      <artifactId>jaxrs-jersey-core</artifactId>
+      <version>${jonas.version}</version>
     </dependency>
 
   </dependencies>
