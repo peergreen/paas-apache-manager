@@ -24,6 +24,8 @@
  */
 package org.ow2.jonas.jpaas.apache.manager.jk.api;
 
+import java.util.List;
+
 /**
  * The interface describing the JkManagerService available on a host to change the configuration of the mod_jk plugin.
  *
@@ -171,5 +173,25 @@ public interface JkManagerService {
     boolean isEnabled(String name);
 
     String getId();
+
+    /**
+     * Create a Load Balancer
+     * @param name Name of the Load Balancer
+     * @param workerList The balance workers
+     */
+    void addLoadBalancer(String name, List<String> workerList) throws JkManagerException;
+
+    /**
+     * Update the workers list of a Load Balancer
+     * @param name Name of the Load Balancer
+     * @param workerList The balance workers
+     */
+    void updateLoadBalancer(String name, List<String> workerList) throws JkManagerException;
+
+    /**
+     * Remove a Load Balancer
+     * @param name Name of the Load Balancer
+     */
+    void removeLoadBalancer(String name) throws JkManagerException;
 
 }

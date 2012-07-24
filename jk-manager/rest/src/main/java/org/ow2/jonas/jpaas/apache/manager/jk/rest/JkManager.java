@@ -31,8 +31,13 @@ import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
 
 import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
+
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class JkManager implements IJkManager{
 
@@ -176,13 +181,76 @@ public class JkManager implements IJkManager{
         } catch (JkManagerException e) {
             logger.error("Cannot create the Worker.", e.getCause());
             Error error = new Error();
-            error.setMessage("Cannot create the Worker named." + EOL + e.getCause());
+            error.setMessage("Cannot create the Worker." + EOL + e.getCause());
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
                     .build();
         }
         return Response.status(Response.Status.CREATED)
+                .build();
+    }
+
+    public Response addLoadBalancer(String name, String workerList) {
+        logger.debug("Inbound call to addLoadBalancer()");
+        logger.debug("(name, workerList) = ("
+                + name + "," + workerList + ")");
+        try {
+            String[] splitWorkers = workerList.split(",");
+            List<String> workers = new LinkedList<String>();
+            Collections.addAll(workers, splitWorkers);
+            jkManagerService.addLoadBalancer(name, workers);
+        } catch (JkManagerException e) {
+            logger.error("Cannot create the Load Balancer.", e.getCause());
+            Error error = new Error();
+            error.setMessage("Cannot create the Balancer named " + name + "." + EOL + e.getCause());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.CREATED)
+                .build();
+    }
+
+    public Response updateLoadBalancer(String name, String workerList) {
+        logger.debug("Inbound call to updateLoadBalancer()");
+        logger.debug("(name, workerList) = ("
+                + name + "," + workerList + ")");
+        try {
+            String[] splitWorkers = workerList.split(",");
+            List<String> workers = new LinkedList<String>();
+            Collections.addAll(workers, splitWorkers);
+            jkManagerService.updateLoadBalancer(name, workers);
+        } catch (JkManagerException e) {
+            logger.error("Cannot update the Load Balancer.", e.getCause());
+            Error error = new Error();
+            error.setMessage("Cannot update the Balancer named " + name + "." + EOL + e.getCause());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.OK)
+                .build();
+    }
+
+    public Response removeLoadBalancer(String name) {
+        logger.debug("Inbound call to removeLoadBalancer()");
+        logger.debug("(name) = ("
+                + name + ")");
+        try {
+            jkManagerService.removeLoadBalancer(name);
+        } catch (JkManagerException e) {
+            logger.error("Cannot remove the Load Balancer.", e.getCause());
+            Error error = new Error();
+            error.setMessage("Cannot remove the Balancer named " + name + "." + EOL + e.getCause());
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.OK)
                 .build();
     }
 }

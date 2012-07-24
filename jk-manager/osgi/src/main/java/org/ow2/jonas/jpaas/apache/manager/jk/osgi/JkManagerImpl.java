@@ -28,6 +28,7 @@ package org.ow2.jonas.jpaas.apache.manager.jk.osgi;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
@@ -120,22 +121,22 @@ public class JkManagerImpl implements JkManagerService {
      */
     @Override
     public void addNamedWorker(String name, String host, String port) throws JkManagerException {
-        logger.info("addNamedWorker (" + name + "," + host + "," + port + ")");
+        logger.debug("addNamedWorker (" + name + "," + host + "," + port + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
 
-        boolean alreadyConfigured = false;
-        // We need to know if there is already a worker
+        boolean nameConflict = false;
+        // We need to know if there is already a worker or a loadBalancer with this name
         for (String string : fileStringList) {
-            if (string.contains("worker." + name + ".host")) {
-                alreadyConfigured = true;
-                throw new JkManagerException("A worker named " + name + " is already present");
+            if (string.contains("worker." + name + ".host") || string.contains("worker." + name + ".type=lb")) {
+                nameConflict = true;
+                throw new JkManagerException("A worker or a Load Balancer named " + name + " is already present");
             }
             newFileStringList.add(string);
         }
 
-        if (!alreadyConfigured) {
+        if (!nameConflict) {
             newFileStringList.add("worker." + name + ".port=" + port);
             newFileStringList.add("worker." + name + ".host=" + host);
             newFileStringList.add("worker." + name + ".type=ajp13");
@@ -156,7 +157,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void addNamedWorker(String name, String loadbalancer, String host, String port, String lbFactor) {
-        logger.info("addNamedWorker (" + name + "," + loadbalancer + "," + host + "," + port + ", " + lbFactor + ")");
+        logger.debug("addNamedWorker (" + name + "," + loadbalancer + "," + host + "," + port + ", " + lbFactor + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -224,7 +225,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void removeNamedWorker(String name) {
-        logger.info("removeNamedWorker (" + name + ")");
+        logger.debug("removeNamedWorker (" + name + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -263,8 +264,8 @@ public class JkManagerImpl implements JkManagerService {
         }
 
         if(loadBalancerIsEmpty && lbToDelete != null) {
-            for(int i = 0; i < newFileStringList.size(); i++) {
-                String string = newFileStringList.get(i);
+            for(ListIterator<String> iterator = fileStringList.listIterator(); iterator.hasNext();) {
+                String string = iterator.next();
 
                 // Delete the load balancer from the worker list
                 if(string.contains("worker.list=")) {
@@ -283,10 +284,10 @@ public class JkManagerImpl implements JkManagerService {
                             newWorkerString += workerListString[j];
                         }
                     }
-                    newFileStringList.set(i, newWorkerString);
+                    iterator.set(newWorkerString);
 
-                } else if(string.contains("worker." + lbToDelete)) {
-                    newFileStringList.remove(string);
+                } else if(string.contains("worker." + lbToDelete + ".")) {
+                    iterator.remove();
                 }
             }
         }
@@ -298,7 +299,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void disableNamedWorker(String name) {
-        logger.info("disableNamedWorker (" + name + ")");
+        logger.debug("disableNamedWorker (" + name + ")");
         modifyStateNamedWorker(name, "d");
 
     }
@@ -307,7 +308,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void enableNamedWorker(String name) {
-        logger.info("enableNamedWorker (" + name + ")");
+        logger.debug("enableNamedWorker (" + name + ")");
         modifyStateNamedWorker(name, "a");
     }
 
@@ -315,7 +316,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void stopNamedWorker(String name) {
-        logger.info("stopNamedWorker (" + name + ")");
+        logger.debug("stopNamedWorker (" + name + ")");
         modifyStateNamedWorker(name, "s");
     }
 
@@ -352,14 +353,14 @@ public class JkManagerImpl implements JkManagerService {
      */
     public void init(String workersConfigurationFile, String reloadCmd) {
         setWorkersConfigurationFile(workersConfigurationFile);
-        logger.info("workersConfigurationFile=" +  workersConfigurationFile);
+        logger.debug("workersConfigurationFile=" +  workersConfigurationFile);
     }
 
     /**
      * {@inheritDoc}
      */
     public void mount(String loadbalancer, String path) {
-        logger.info("mountWorker (" + path + ", " + loadbalancer + ")");
+        logger.debug("mountWorker (" + path + ", " + loadbalancer + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -390,7 +391,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void unmount() {
-        logger.info("unmount()");
+        logger.debug("unmount()");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -410,7 +411,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void unmount(String loadbalancer) {
-        logger.info("unmount(" + loadbalancer + ")");
+        logger.debug("unmount(" + loadbalancer + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -430,7 +431,7 @@ public class JkManagerImpl implements JkManagerService {
      * {@inheritDoc}
      */
     public void unmount(String loadbalancer, String path) {
-        logger.info("unmount(" + loadbalancer + ", " + path + ")");
+        logger.debug("unmount(" + loadbalancer + ", " + path + ")");
 
         List<String> fileStringList = apacheUtilService.loadConfigurationFile(jkConfigurationFile);
         List<String> newFileStringList = new LinkedList<String>();
@@ -455,7 +456,7 @@ public class JkManagerImpl implements JkManagerService {
         List<String> fileStringList =
                 apacheUtilService.loadConfigurationFile(workersConfigurationFile);
 
-        logger.info("name=" +  name);
+        logger.debug("name=" +  name);
 
         boolean isConfiguredInBalancer = false;
         boolean isConfiguredInWorker = false;
@@ -464,19 +465,19 @@ public class JkManagerImpl implements JkManagerService {
             String string = iterator.next();
 
             if (string.contains("balance_workers=") && string.contains(name)) {
-                logger.info("isConfiguredInBalancer=" +  true);
+                logger.debug("isConfiguredInBalancer=" +  true);
                 isConfiguredInBalancer = true;
             }
             if (string.contains("worker." + name + ".host")) {
-                logger.info("isConfiguredInWorker=" +  true);
+                logger.debug("isConfiguredInWorker=" +  true);
                 isConfiguredInWorker = true;
 
             }
         }
         if (isConfiguredInBalancer && isConfiguredInWorker) {
-            logger.info("-> is configured");
+            logger.debug("-> is configured");
         } else {
-            logger.info("-> is not configured");
+            logger.debug("-> is not configured");
         }
 
         return isConfiguredInBalancer && isConfiguredInWorker;
@@ -486,8 +487,7 @@ public class JkManagerImpl implements JkManagerService {
      * @return true if enabled
      */
     public boolean isEnabled(String name) {
-
-        logger.info("name=" +  name);
+        logger.debug("name=" +  name);
 
         boolean isConfiguredFlag = isConfigured(name);
 
@@ -501,18 +501,18 @@ public class JkManagerImpl implements JkManagerService {
                 String string = iterator.next();
 
                 if (string.contains("worker." + name + ".activation")) {
-                    logger.info("worker." + name + ".activation detected");
+                    logger.debug("worker." + name + ".activation detected");
                     String[] prop = string.split("=");
                     if (prop[1].trim().toLowerCase().equals("a")) {
-                        logger.info("worker." + name + ".activation = a -> enabled");
+                        logger.debug("worker." + name + ".activation = a -> enabled");
                         return true;
                     } else {
-                        logger.info("worker." + name + ".activation != a -> disabled");
+                        logger.debug("worker." + name + ".activation != a -> disabled");
                         return false;
                     }
                 }
             }
-            logger.info("worker." + name + " -> enabled");
+            logger.debug("worker." + name + " -> enabled");
 
             return true;
         }
@@ -532,5 +532,137 @@ public class JkManagerImpl implements JkManagerService {
 
     private void setJkConfigurationFile(String jkConfigurationFile) {
         this.jkConfigurationFile = jkConfigurationFile;
+    }
+
+    /**
+     * Create a Load Balancer
+     * @param name Name of the Load Balancer
+     * @param workerList The balance workers
+     */
+    public void addLoadBalancer(String name, List<String> workerList) throws JkManagerException {
+        logger.debug("addLoadBalancer (" + name + "," + workerList.toString() + ")");
+
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
+        List<String> newFileStringList = new LinkedList<String>();
+
+        boolean nameConflict = false;
+        // We need to know if there is already a worker or a LoadBalancer with this name
+        for (String string : fileStringList) {
+            if (string.contains("worker." + name + ".host") || string.contains("worker." + name + ".type=lb")) {
+                nameConflict = true;
+                throw new JkManagerException("A Load Balancer or a worker named " + name + " is already present.");
+            }
+            newFileStringList.add(string);
+        }
+
+        if (!nameConflict) {
+            newFileStringList.add("worker." + name + ".type=lb");
+            String wl = "";
+            boolean first = true;
+            for(String s : workerList) {
+                if (first) {
+                    first=false;
+                } else {
+                    wl += ",";
+                }
+                wl += s;
+            }
+            newFileStringList.add("worker." + name + ".balance_workers=" + wl);
+
+            for (int i = 0; i < newFileStringList.size(); i++) {
+                String string = newFileStringList.get(i);
+
+                // Add the new loadbalancer worker to the worker list
+                if (string.contains("worker.list=")) {
+                    if(string.split("=")[1].split(",").length > 0) {
+                        string += ",";
+                    }
+                    string += name;
+                    newFileStringList.set(i, string);
+                    break;
+                }
+            }
+        }
+
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
+    }
+
+    /**
+     * Update the workers list of a Load Balancer
+     * @param name Name of the Load Balancer
+     * @param workerList The balance workers
+     */
+    public void updateLoadBalancer(String name, List<String> workerList) throws JkManagerException {
+        logger.debug("updateLoadBalancer (" + name + "," + workerList.toString() + ")");
+
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
+        List<String> newFileStringList = new LinkedList<String>();
+
+        boolean loadBalancerExists = false;
+        for (String string : fileStringList) {
+            if (string.contains("worker." + name + ".balance_workers=")) {
+                loadBalancerExists = true;
+                String wl = "";
+                boolean first = true;
+                for(String s : workerList) {
+                    if (first) {
+                        first=false;
+                    } else {
+                        wl += ",";
+                    }
+                    wl += s;
+                }
+                newFileStringList.add("worker." + name + ".balance_workers=" + wl);
+            } else {
+                newFileStringList.add(string);
+            }
+        }
+        if (!loadBalancerExists) {
+            throw new JkManagerException("The Load Balancer named " + name + " does not exist.");
+        }
+
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
+    }
+
+    /**
+     * Remove a Load Balancer
+     * @param name Name of the Load Balancer
+     */
+    public void removeLoadBalancer(String name) throws JkManagerException {
+        logger.debug("removeLoadBalancer (" + name + ")");
+
+        List<String> fileStringList = apacheUtilService.loadConfigurationFile(workersConfigurationFile);
+
+        boolean loadBalancerExists = false;
+        for(ListIterator<String> iterator = fileStringList.listIterator(); iterator.hasNext();) {
+            String string = iterator.next();
+            // Delete the load balancer from the worker list
+            if (string.contains("worker.list=")) {
+                String[] listString = string.split("=");
+                String[] workerListString = listString[1].split(",");
+                String newWorkerString = listString[0] + "=";
+                boolean first = true;
+                for (int j = 0 ; j < workerListString.length; j++) {
+                    if (! workerListString[j].equals(name)) {
+                        if (!first) {
+                            newWorkerString += ",";
+
+                        } else {
+                            first = false;
+                        }
+                        newWorkerString += workerListString[j];
+                    }
+                }
+                iterator.set(newWorkerString);
+
+            } else if (string.contains("worker." + name + ".")) {
+                loadBalancerExists = true;
+                iterator.remove();
+            }
+        }
+        if (!loadBalancerExists) {
+            throw new JkManagerException("The Load Balancer named " + name + " does not exist.");
+        }
+        apacheUtilService.flushConfigurationFile(workersConfigurationFile, fileStringList);
     }
 }
