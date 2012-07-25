@@ -29,6 +29,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
@@ -36,6 +38,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerException;
 import org.ow2.jonas.jpaas.apache.manager.jk.api.JkManagerService;
+import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
@@ -664,5 +667,77 @@ public class JkManagerImpl implements JkManagerService {
             throw new JkManagerException("The Load Balancer named " + name + " does not exist.");
         }
         apacheUtilService.flushConfigurationFile(workersConfigurationFile, fileStringList);
+    }
+
+    /**
+     * Mount a path in a Vhost for all workers in load balancing
+     *
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to send the requests
+     * @param path         the path to mount it
+     */
+    @Override
+    public long mountInVhost(long vhostID, String loadbalancer, String path) throws JkManagerException {
+        logger.debug("mountInVhost (" + vhostID + "," + loadbalancer + ", " + path + ")");
+        String directiveArgs = path + " " + loadbalancer;
+        try {
+            return apacheUtilService.addDirectiveInVhost(vhostID, "JkMount", directiveArgs);
+        } catch (ApacheManagerException e) {
+            throw new JkManagerException("Cannot mount the loadbalancer " + loadbalancer +
+                    " in the vhost.", e);
+        }
+    }
+
+    /**
+     * Delete all mount points for a load balancer.
+     *
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to unmount
+     */
+    @Override
+    public void unmountInVhost(long vhostID, String loadbalancer) throws JkManagerException {
+        logger.debug("unmountInVhost (" + vhostID + "," + loadbalancer + ")");
+
+        try {
+            String vhostFilePath = apacheUtilService.getVhostConfigurationFile(vhostID);
+            String content = apacheUtilService.fileToString(vhostFilePath);
+            String lb = apacheUtilService.stringToRegex(loadbalancer);
+            Pattern pattern = Pattern.compile("#id=(\\d*)" + System.getProperty("line.separator") +
+                    "JkMount" + "[ \\t]*" + ".*?[ \\t]*(" + lb + ")[\\s]");
+            Matcher matcher = pattern.matcher(content);
+            List<Long> idList = new LinkedList<Long>();
+            while (matcher.find()) {
+                idList.add(Long.valueOf(matcher.group(1)));
+            }
+            for (Long id : idList) {
+                apacheUtilService.removeDirectiveInVhostIfPossible(vhostID, id);
+            }
+        } catch (ApacheManagerException e) {
+            throw new JkManagerException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Delete a mount point for a worker.
+     *
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to unmount
+     * @param path         the path to unmount
+     */
+    @Override
+    public void unmountInVhost(long vhostID, String loadbalancer, String path) throws JkManagerException {
+        logger.debug("unmountInVhost (" + vhostID + "," + loadbalancer + ", " + path + ")");
+        String directiveArgs = path + " " + loadbalancer;
+        String vhostFilePath = null;
+        try {
+            vhostFilePath = apacheUtilService.getVhostConfigurationFile(vhostID);
+            List<Long> idList;
+            idList = apacheUtilService.getDirectivesIdInFile(vhostFilePath, "JkMount", directiveArgs);
+            for (Long id : idList) {
+                apacheUtilService.removeDirectiveInVhostIfPossible(vhostID, id);
+            }
+        } catch (ApacheManagerException e) {
+            throw new JkManagerException(e.getMessage(), e);
+        }
     }
 }

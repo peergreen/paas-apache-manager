@@ -132,4 +132,16 @@ public interface IJkManager {
     @Path("/loadbalancer/{name}")
     @Produces(MediaType.APPLICATION_XML)
     public Response removeLoadBalancer(@PathParam("name") String name);
+
+    @POST
+    @Path("/vhost/{vhostID}/mount/{loadbalancer}")
+    public Response mountInVhost(@PathParam("vhostID") Long vhostID,
+            @PathParam("loadbalancer") String loadbalancer,
+            @QueryParam("path") String path);
+
+    @DELETE
+    @Path("/vhost/{vhostID}/mount/{loadbalancer}")
+    public Response unmountInVhost(@PathParam("vhostID") Long vhostID,
+            @PathParam("loadbalancer") String loadbalancer,
+            @QueryParam("path") String path);
 }

@@ -446,7 +446,7 @@ public class ApacheUtil implements ApacheUtilService {
             //if no match found
             return 1L;
         } catch (ApacheManagerException e) {
-            throw new ApacheManagerException("Cannot get an available ID", e.getCause());
+            throw new ApacheManagerException("Cannot get an available ID", e);
         }
     }
 
@@ -494,7 +494,7 @@ public class ApacheUtil implements ApacheUtilService {
             in.readFully(buffer);
             result = new String(buffer);
         } catch (IOException e) {
-            throw new ApacheManagerException("Problem to read file " + file, e.getCause());
+            throw new ApacheManagerException("Problem to read file " + file, e);
         } finally {
             try {
                 if (in != null) {
@@ -581,6 +581,58 @@ public class ApacheUtil implements ApacheUtilService {
     }
 
     /**
+     * Get the Id of the directives which match the directive name and arguments
+     *
+     * @param file         path of the file
+     * @param directive    the directive to add
+     * @param directiveArg argument(s) of the directive
+     * @return a list of Id
+     * @throws org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException
+     *
+     */
+    @Override
+    public List<Long> getDirectivesIdInFile(String file, String directive, String directiveArg)
+            throws ApacheManagerException {
+        logger.debug("getDirectivesIdInFile (" + file + "," + directive + "," + directiveArg + ")");
+        List<Long> idList = new LinkedList<Long>();
+        try {
+            String content = fileToString(file);
+            String arguments = stringToRegex(directiveArg);
+            arguments = arguments.replaceAll("\\s+", " ");
+            Pattern pattern = Pattern.compile("#id=(\\d*)" + System.getProperty("line.separator") +
+                    directive + "[ \\t]*" + arguments);
+            Matcher matcher = pattern.matcher(content);
+            while (matcher.find()) {
+                idList.add(Long.valueOf(matcher.group(1)));
+            }
+            return idList;
+        } catch (IllegalStateException e) {
+            //if no match found
+            logger.debug("No directive found");
+            return idList;
+        } catch (ApacheManagerException e) {
+            throw new ApacheManagerException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Escape special characters of a string to work in a Regex
+     * @param s the string to transform
+     * @return the regex
+     */
+    public String stringToRegex(String s) {
+        StringBuilder b = new StringBuilder();
+        for(int i=0; i<s.length(); ++i) {
+            char ch = s.charAt(i);
+            if ("\\.^$|?*+[]{}()".indexOf(ch) != -1)
+                b.append('\\').append(ch);
+            else
+                b.append(ch);
+        }
+        return b.toString();
+    }
+
+    /**
      * @return Get the reload command
      */
     private String getApacheReloadCmd() {
@@ -621,7 +673,7 @@ public class ApacheUtil implements ApacheUtilService {
             logger.debug("Execute command {0}", command);
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
-            throw new ApacheManagerException("Cannot reload Apache HTTP configuration : {0}", e.getCause());
+            throw new ApacheManagerException("Cannot reload Apache HTTP configuration : {0}", e);
         }
     }
 
@@ -636,7 +688,7 @@ public class ApacheUtil implements ApacheUtilService {
             logger.debug("Execute command {0}", command);
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
-            throw new ApacheManagerException("Cannot start Apache HTTP : {0}", e.getCause());
+            throw new ApacheManagerException("Cannot start Apache HTTP : {0}", e);
         }
     }
 
@@ -651,7 +703,7 @@ public class ApacheUtil implements ApacheUtilService {
             logger.debug("Execute command {0}", command);
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
-            throw new ApacheManagerException("Cannot stop Apache HTTP : {0}", e.getCause());
+            throw new ApacheManagerException("Cannot stop Apache HTTP : {0}", e);
         }
     }
 }

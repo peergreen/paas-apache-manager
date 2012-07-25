@@ -194,4 +194,27 @@ public interface JkManagerService {
      */
     void removeLoadBalancer(String name) throws JkManagerException;
 
+    /**
+     * Mount a path in a Vhost for all workers in load balancing
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to send the requests
+     * @param path the path to mount it
+     */
+    long mountInVhost(long vhostID, String loadbalancer, String path) throws JkManagerException;
+
+    /**
+     * Delete all mount points for a load balancer.
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to unmount
+     */
+    void unmountInVhost(long vhostID, String loadbalancer) throws JkManagerException;
+
+    /**
+     * Delete a mount point for a worker.
+     * @param vhostID ID of the virtual host
+     * @param loadbalancer the loadbalancer to unmount
+     * @param path the path to unmount
+     */
+    void unmountInVhost(long vhostID, String loadbalancer, String path) throws JkManagerException;
+
 }

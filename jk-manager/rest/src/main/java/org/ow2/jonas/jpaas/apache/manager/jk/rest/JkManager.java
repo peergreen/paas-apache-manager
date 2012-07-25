@@ -32,6 +32,7 @@ import org.ow2.util.log.LogFactory;
 
 import org.ow2.jonas.jpaas.apache.manager.util.api.xml.Error;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -55,8 +56,8 @@ public class JkManager implements IJkManager{
     }
 
     public void addNamedWorker(String name, String loadbalancer,
-                               String host, String port,
-                               String lbFactor) {
+            String host, String port,
+            String lbFactor) {
         logger.debug("Inbound call to addNamedWorker()");
         logger.debug("(name, host, port, type, lbFactor) = (" + name + ", "
                 + loadbalancer + ", "
@@ -70,7 +71,7 @@ public class JkManager implements IJkManager{
     }
 
     public void addWorker(String loadbalancer, String host, String port,
-                          String lbFactor) {
+            String lbFactor) {
         logger.debug("Inbound call to addNamedWorker()");
         logger.debug("(host, port, type, lbFactor) = (" + loadbalancer + ", "
                 + host + ", " + port
@@ -160,9 +161,9 @@ public class JkManager implements IJkManager{
         try {
             jkManagerService.addNamedWorker(name, host, port);
         } catch (JkManagerException e) {
-            logger.error("Cannot create the Worker named " + name + ".", e.getCause());
+            logger.error("Cannot create the Worker named " + name + ".", e);
             Error error = new Error();
-            error.setMessage("Cannot create the Worker named " + name + "." + EOL + e.getCause());
+            error.setMessage("Cannot create the Worker named " + name + "." + EOL + e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
@@ -179,9 +180,9 @@ public class JkManager implements IJkManager{
         try {
             jkManagerService.addWorker(host, port);
         } catch (JkManagerException e) {
-            logger.error("Cannot create the Worker.", e.getCause());
+            logger.error("Cannot create the Worker.", e);
             Error error = new Error();
-            error.setMessage("Cannot create the Worker." + EOL + e.getCause());
+            error.setMessage("Cannot create the Worker." + EOL + e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
@@ -201,9 +202,9 @@ public class JkManager implements IJkManager{
             Collections.addAll(workers, splitWorkers);
             jkManagerService.addLoadBalancer(name, workers);
         } catch (JkManagerException e) {
-            logger.error("Cannot create the Load Balancer.", e.getCause());
+            logger.error("Cannot create the Load Balancer.", e);
             Error error = new Error();
-            error.setMessage("Cannot create the Balancer named " + name + "." + EOL + e.getCause());
+            error.setMessage("Cannot create the Load Balancer named " + name + "." + EOL + e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
@@ -223,9 +224,9 @@ public class JkManager implements IJkManager{
             Collections.addAll(workers, splitWorkers);
             jkManagerService.updateLoadBalancer(name, workers);
         } catch (JkManagerException e) {
-            logger.error("Cannot update the Load Balancer.", e.getCause());
+            logger.error("Cannot update the Load Balancer.", e);
             Error error = new Error();
-            error.setMessage("Cannot update the Balancer named " + name + "." + EOL + e.getCause());
+            error.setMessage("Cannot update the Load Balancer named " + name + "." + EOL + e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
@@ -242,10 +243,59 @@ public class JkManager implements IJkManager{
         try {
             jkManagerService.removeLoadBalancer(name);
         } catch (JkManagerException e) {
-            logger.error("Cannot remove the Load Balancer.", e.getCause());
+            logger.error("Cannot remove the Load Balancer.", e);
             Error error = new Error();
-            error.setMessage("Cannot remove the Balancer named " + name + "." + EOL + e.getCause());
+            error.setMessage("Cannot remove the Load Balancer named " + name + "." + EOL + e);
             return Response.status(Response.Status.NOT_FOUND)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.OK)
+                .build();
+    }
+
+    public Response mountInVhost(Long vhostID, String loadbalancer, String path) {
+        logger.debug("Inbound call to mount()");
+        logger.debug("(vhostID, loadbalancer, path) = ("
+                + vhostID + ", " + loadbalancer + ", " + path +  ")");
+        try {
+            jkManagerService.mountInVhost(vhostID, loadbalancer, path);
+        } catch (JkManagerException e) {
+            logger.error("Cannot mount the Load Balancer.", e);
+            Error error = new Error();
+            error.setMessage("Cannot mount the Load Balancer named " + loadbalancer + "." + EOL + e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(error)
+                    .type(MediaType.APPLICATION_XML_TYPE)
+                    .build();
+        }
+        return Response.status(Response.Status.CREATED)
+                .build();
+    }
+
+    public Response unmountInVhost(Long vhostID, String loadbalancer, String path) {
+        logger.debug("Inbound call to unmountInVhost()");
+        logger.debug("(vhostID, loadbalancer, path) = ("
+                + vhostID + ", " + loadbalancer + ", " + path +  ")");
+        try {
+            if (path==null) {
+                jkManagerService.unmountInVhost(vhostID, loadbalancer);
+            } else {
+                jkManagerService.unmountInVhost(vhostID, loadbalancer, path);
+            }
+        } catch (JkManagerException e) {
+            Error error = new Error();
+            if (path==null) {
+                logger.error("Cannot unmount the Load Balancer named " + loadbalancer + " in path " + path +
+                        "." + EOL + e);
+                error.setMessage("Cannot unmount the Load Balancer named " + loadbalancer + " in path " + path +
+                        "." + EOL + e);
+            } else {
+                logger.error("Cannot unmount the Load Balancer named " + loadbalancer + "." + EOL + e);
+                error.setMessage("Cannot unmount the Load Balancer named " + loadbalancer + "." + EOL + e);
+            }
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(error)
                     .type(MediaType.APPLICATION_XML_TYPE)
                     .build();

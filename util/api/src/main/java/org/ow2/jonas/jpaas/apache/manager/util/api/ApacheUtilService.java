@@ -193,6 +193,17 @@ public interface ApacheUtilService {
     public void removeDirectiveInFile(String file, long directiveID) throws ApacheManagerException;
 
     /**
+     * Get the Id of the directives which match the directive name and arguments
+     * @param file path of the file
+     * @param directive the directive to add
+     * @param directiveArg argument(s) of the directive
+     * @return a list of Id
+     * @throws ApacheManagerException
+     */
+    public List<Long> getDirectivesIdInFile(String file, String directive, String directiveArg)
+            throws ApacheManagerException;
+
+    /**
      * reload apache2 configuration
      */
     public void reloadApache() throws ApacheManagerException;
@@ -206,5 +217,12 @@ public interface ApacheUtilService {
      * stop apache2
      */
     public void stopApache() throws ApacheManagerException;
+
+    /**
+     * Escape special characters of a string to work in a Regex
+     * @param s the string to transform
+     * @return the regex
+     */
+    public String stringToRegex(String s);
 
 }
