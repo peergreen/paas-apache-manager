@@ -43,16 +43,16 @@ public interface IJkManager {
     @Path("/worker/{name}/loadbalancer/{loadbalancer}")
     void addNamedWorker(@PathParam("name") String name,
             @PathParam("loadbalancer") String loadbalancer,
-            @FormParam("host") String host,
-            @FormParam("port") String port,
-            @FormParam("lbFactor") String lbFactor);
+            @QueryParam("host") String host,
+            @QueryParam("port") String port,
+            @QueryParam("lbFactor") String lbFactor);
 
     @POST
     @Path("/worker/loadbalancer/{loadbalancer}")
     void addWorker(@PathParam("loadbalancer")String loadbalancer,
-            @FormParam("host")String host,
-            @FormParam("port")String port,
-            @FormParam("lbFactor")String lbFactor);
+            @QueryParam("host")String host,
+            @QueryParam("port")String port,
+            @QueryParam("lbFactor")String lbFactor);
 
     @DELETE
     @Path("/worker/{name}")
@@ -73,7 +73,7 @@ public interface IJkManager {
     @POST
     @Path("/mount/{loadbalancer}")
     void mount(@PathParam("loadbalancer") String loadbalancer,
-            @FormParam("path") String path);
+            @QueryParam("path") String path);
 
     @DELETE
     @Path("/mount/{loadbalancer}")
