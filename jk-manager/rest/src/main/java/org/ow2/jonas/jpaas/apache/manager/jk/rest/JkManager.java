@@ -251,7 +251,7 @@ public class JkManager implements IJkManager{
                     .type(MediaType.APPLICATION_XML_TYPE)
                     .build();
         }
-        return Response.status(Response.Status.OK)
+        return Response.status(Response.Status.NO_CONTENT)
                 .build();
     }
 
@@ -300,7 +300,7 @@ public class JkManager implements IJkManager{
                     .type(MediaType.APPLICATION_XML_TYPE)
                     .build();
         }
-        return Response.status(Response.Status.OK)
+        return Response.status(Response.Status.NO_CONTENT)
                 .build();
     }
 }

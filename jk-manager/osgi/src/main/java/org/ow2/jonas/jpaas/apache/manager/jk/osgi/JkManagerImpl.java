@@ -195,11 +195,13 @@ public class JkManagerImpl implements JkManagerService {
             newFileStringList.add("worker." + loadbalancer + ".type=lb");
             newFileStringList.add("worker." + loadbalancer + ".balance_workers=" + name);
 //            newFileStringList.add("worker.loadbalancer.sticky_session=false");
+            boolean workerListExists = false;
             for (int i = 0; i < newFileStringList.size(); i++) {
                 String string = newFileStringList.get(i);
 
                 // Add the new loadbalancer worker to the worker list
                 if(string.contains("worker.list=")) {
+                    workerListExists = true;
                     if(string.split("=")[1].split(",").length > 0) {
                         string += ",";
                     }
@@ -207,6 +209,9 @@ public class JkManagerImpl implements JkManagerService {
                     newFileStringList.set(i, string);
                     break;
                 }
+            }
+            if (!workerListExists) {
+                newFileStringList.add("worker.list=" + name);
             }
         }
 
@@ -572,11 +577,13 @@ public class JkManagerImpl implements JkManagerService {
             }
             newFileStringList.add("worker." + name + ".balance_workers=" + wl);
 
+            boolean workerListExists = false;
             for (int i = 0; i < newFileStringList.size(); i++) {
                 String string = newFileStringList.get(i);
 
                 // Add the new loadbalancer worker to the worker list
                 if (string.contains("worker.list=")) {
+                    workerListExists = true;
                     if(string.split("=")[1].split(",").length > 0) {
                         string += ",";
                     }
@@ -585,6 +592,10 @@ public class JkManagerImpl implements JkManagerService {
                     break;
                 }
             }
+            if (!workerListExists) {
+                newFileStringList.add("worker.list=" + name);
+            }
+
         }
 
         apacheUtilService.flushConfigurationFile(workersConfigurationFile, newFileStringList);
