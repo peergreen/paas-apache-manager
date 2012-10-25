@@ -390,6 +390,7 @@ public class JkManagerImpl implements JkManagerService {
         }
 
         newFileStringList.add("");
+        newFileStringList.add("JkMount /jkmanager jkstatus");
         newFileStringList.add("JkMountCopy  All");
 
         apacheUtilService.flushConfigurationFile(jkConfigurationFile, newFileStringList);
