@@ -73,6 +73,12 @@
     </pluginManagement>
   </build>
 
+  <scm>
+    <connection>scm:git:git://gitorious.ow2.org/ow2-jasmine/jpaas-apache-manager.git</connection>
+    <developerConnection>scm:git:git@gitorious.ow2.org:ow2-jasmine/jpaas-apache-manager.git</developerConnection>
+    <url>http://gitorious.ow2.org/ow2-jasmine/jpaas-apache-manager/trees/master</url>
+  </scm>
+
     <modules>
         <module>util</module>
         <module>vhost-manager</module>
