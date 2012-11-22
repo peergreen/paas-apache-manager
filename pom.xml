@@ -29,7 +29,7 @@
 
     <groupId>org.ow2.jonas.jpaas.apache-manager</groupId>
     <artifactId>apache-manager</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>JPaaS :: Apache Manager</name>
 
