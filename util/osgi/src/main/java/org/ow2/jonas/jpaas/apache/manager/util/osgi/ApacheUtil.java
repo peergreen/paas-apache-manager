@@ -13,9 +13,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * $Id:$
- */ 
+ */
 
 package org.ow2.jonas.jpaas.apache.manager.util.osgi;
 
@@ -29,11 +29,11 @@ import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheManagerException;
 import org.ow2.jonas.jpaas.apache.manager.util.api.ApacheUtilService;
 import org.ow2.util.log.Log;
 import org.ow2.util.log.LogFactory;
-import org.ow2.jonas.lib.bootstrap.JProp;
 
 import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -150,8 +150,15 @@ public class ApacheUtil implements ApacheUtilService {
      * @return the property value
      */
     public String getPropertyValue(String propertyName) {
-        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        return prop.getValue(propertyName);
+    	//FIXME: replaced JProp by this but we should keep the data instead of reloading the resource each time
+    	try {
+    	    Properties props = new Properties();
+            props.load(ApacheUtil.class.getClassLoader().getResourceAsStream(APACHE_MANAGER_PROPERTY_FILE_NAME));
+    	    return props.getProperty(propertyName);
+    	} catch (IOException e) {
+    		logger.error("Unable to load a property", e);
+    		return null;
+    	}
     }
 
     /**
@@ -630,9 +637,8 @@ public class ApacheUtil implements ApacheUtilService {
      * @return Get the reload command
      */
     private String getApacheReloadCmd() {
-        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
-        String reloadArg = prop.getValue(CMD_RELOAD_ARG_PROPERTY);
+        String apacheCmd =  getPropertyValue(CMD_APACHE_PROPERTY);
+        String reloadArg = getPropertyValue(CMD_RELOAD_ARG_PROPERTY);
         return apacheCmd + " " + reloadArg;
     }
 
@@ -640,9 +646,8 @@ public class ApacheUtil implements ApacheUtilService {
      * @return Get the start command
      */
     private String getApacheStartCmd() {
-        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
-        String startArg = prop.getValue(CMD_START_ARG_PROPERTY);
+        String apacheCmd =  getPropertyValue(CMD_APACHE_PROPERTY);
+        String startArg = getPropertyValue(CMD_START_ARG_PROPERTY);
         return apacheCmd + " " + startArg;
     }
 
@@ -650,9 +655,8 @@ public class ApacheUtil implements ApacheUtilService {
      * @return Get the stop command
      */
     private String getApacheStopCmd() {
-        JProp prop = JProp.getInstance(APACHE_MANAGER_PROPERTY_FILE_NAME);
-        String apacheCmd =  prop.getValue(CMD_APACHE_PROPERTY);
-        String stopArg = prop.getValue(CMD_STOP_ARG_PROPERTY);
+        String apacheCmd =  getPropertyValue(CMD_APACHE_PROPERTY);
+        String stopArg = getPropertyValue(CMD_STOP_ARG_PROPERTY);
         return apacheCmd + " " + stopArg;
     }
 
